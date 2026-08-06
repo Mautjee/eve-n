@@ -1,96 +1,139 @@
-# vivera-site
+# vivera-site — eve-n.nl
 
-A static, hand-written marketing website for EVE-N (a Dutch consultancy for team
-development and collaboration in infrastructure projects). It is seven standalone
-HTML pages in Dutch (`lang="nl"`) sharing one stylesheet and one script, with no
-build step, no framework, and no server-side code. The pages are a
-pixel-reconstruction of an Adobe XD design: the original artboard renders, the
-exported image resources, and the XD `globalResources.json` / `interactions.json`
-dumps live in `reference/` and are the source of truth for colours, type sizes,
-and copy. Python/bash helper scripts exist only to fetch and slice those
-reference renders for visual inspection.
+## The goal
+
+Rebuild **eve-n.nl** as a custom WordPress theme that matches the Adobe XD
+design in `reference/`, in Dutch, working on desktop and mobile, with a blog
+that Eveline Hinfelaar and Thomas Vilain can write and publish from `wp-admin`
+without a developer.
+
+EVE-N is a Dutch consultancy for team development and collaboration in
+infrastructure projects. Seven pages: Home, Onze Werkwijze, Projecten, Over ons,
+Blog index, Blog post, Contact.
+
+**What is live today is not this site.** `eve-n.nl` currently runs an older
+design on the Astra theme under the branding "Eve(N)|n=3", with no blog. This
+project replaces it.
+
+## Why WordPress
+
+The host is **SiteGround shared hosting**, which runs PHP and MySQL and
+[does not support Node.js](https://www.siteground.com/kb/node-js-available/).
+Astro, Next and anything Node-based are therefore impossible on this host —
+this is settled, do not re-litigate it.
+
+WordPress was chosen over hand-written PHP because the blog requirement (a
+non-technical author pasting formatted text from other sources, with images,
+drafts and publishing) otherwise means hand-building auth, sessions, CSRF, a
+rich-text editor, paste sanitisation, image upload and resizing — weeks of work
+and a bespoke security surface. SiteGround also ships one-click WordPress,
+staging, and managed updates.
+
+The trade-off accepted: WordPress is heavier than static. It is mitigated by
+writing a lean custom theme — **no page builder, no theme framework, no plugin
+sprawl.** Keep it that way.
 
 ## Layout
 
-- `*.html` (repo root) — the deliverable pages, one file per route:
-  `index.html`, `onze-werkwijze.html`, `reviews.html` (titled "Projecten"),
-  `over-ons.html`, `blogs.html`, `blog-pagina.html`, `contact.html`.
-  Header, mobile menu, and footer markup are duplicated verbatim in every page.
-- `assets/css/style.css` — the entire stylesheet (~1065 lines). Starts with a
-  `:root` design-token block, then one commented section per component.
-- `assets/js/main.js` — the entire script (~50 lines): mobile menu toggle,
-  accordion toggle, project-card toggle. No dependencies.
-- `assets/res-*.webp` — image resources exported from XD, referenced by content
-  hash filename from the HTML.
-- `reference/` — design source of truth. `catalog-<page>.md` are per-page written
-  specs (colours, sizes, copy) derived from the renders; `<page>.png` and
-  `phone-<page>.png` are the desktop/phone artboard renders; `crops/` holds
-  sliced/zoomed strips of those renders; `globalResources.json` and
-  `interactions.json` are raw XD exports.
-- `screenshots/` — browser screenshots of the built pages for comparison against
-  `reference/`, named `<page>-<viewport-width>[-vN].png` (1920 = desktop,
-  393 = phone).
-- `download.sh`, `slice.py`, `slice.sh`, `crop.py` — tooling for the reference
-  workflow only; they do not touch the site output.
-- `.grove/` — Grove workspace config and markdown task files (`tasks/task-NNN.md`
-  with YAML frontmatter: id, title, status, priority, labels, created, pr).
+- `wp-content/themes/eve-n/` — **the deliverable.** The only thing that ships.
+  - `style.css` — theme header only. Real CSS is `assets/css/main.css`.
+  - `functions.php` — theme supports, asset loading, nav helpers.
+  - `header.php` / `footer.php` — shared chrome, written once.
+  - `assets/css/main.css` — the full stylesheet, ported verbatim from the
+    static site, plus a "WordPress integration" block at the end.
+  - `assets/js/main.js` — mobile menu, accordion, card toggle. No dependencies.
+- `reference/` — **design source of truth, read-only.**
+  - `catalog-<page>.md` — written specs per page: exact colours, type sizes and
+    **verbatim Dutch copy**. Seed page content from these, never retype from a
+    screenshot.
+  - `<page>.png` / `phone-<page>.png` — desktop and phone artboard renders.
+  - `crops/` — sliced strips of those renders for detailed reading.
+  - `globalResources.json` / `interactions.json` — raw XD exports.
+- `*.html` + `assets/` (repo root) — the **static reconstruction**, the port
+  source. Each page's markup and CSS is already written and visually verified;
+  porting a page means moving that markup into a PHP template, not designing it
+  again. Do not delete these until every page is ported.
+- `screenshots/` — browser captures for comparison, `<page>-<width>[-vN].png`
+  (1920 = desktop, 393 = phone). Gitignored.
+- `.grove/tasks/task-NNN.md` — the work queue.
 
-There is no test directory and no test framework.
-
-## Build / test / lint
-
-There is no build, test, or lint tooling in this repo — no `package.json`,
-`Makefile`, `requirements.txt`, or `pyproject.toml`. The commands that exist:
+## Local development
 
 ```
-open index.html                              # view the site directly (file://)
-python3 -m http.server 8000                  # or serve the root and open :8000
-./download.sh                                # re-fetch XD renders + assets into reference/ and assets/
-./slice.sh reference/home.png 650 50         # sips-based slicing -> reference/crops/home-NN.png
-.venv/bin/python slice.py reference/home.png 650 50 --scale 2   # PIL equivalent, supports --scale
-.venv/bin/python crop.py reference/home.png X Y W H out.png 3.0 # zoom a region
+npm install
+npx wp-env start          # WordPress + MySQL on Docker, PHP 8.2
+npx wp-env run cli wp ...  # wp-cli
+npx wp-env stop
 ```
 
-`slice.py` / `crop.py` need the checked-in `.venv` (Pillow); `slice.sh` needs
-macOS `sips`. There is no requirements file — the venv is the dependency record.
+Site: `http://localhost:8888`. Admin: `http://localhost:8888/wp-admin`
+(`admin` / `password`). The theme is mounted from `wp-content/themes/eve-n`,
+so edits are live on refresh.
+
+There is **no build step and no test framework.** Verification is visual:
+screenshot at 1920 and 393 and compare against `reference/`.
+
+```
+.venv/bin/python slice.py reference/home.png 650 50 --scale 2  # strips
+.venv/bin/python crop.py reference/home.png X Y W H out.png 3.0 # zoom
+```
+
+## Content architecture
+
+Which parts are editable in `wp-admin` versus fixed in a template. Follow this —
+it is the difference between a site the client can maintain and one they cannot.
+
+| Page | Structure | Text |
+|---|---|---|
+| Home | Template | Hardcoded for v1 (composed layout; revisit later) |
+| Onze Werkwijze | Template | `the_content()` — fully editable |
+| Over ons | Template | Intro via `the_content()`; person cards structured |
+| Projecten | Template | Accordion items parsed from `the_content()` headings |
+| Contact | Template | Form + contact blocks structured |
+| Blog | WordPress | **Fully editable — this is the point of the project** |
+
+Default to editable. Hardcode only where the layout genuinely cannot survive
+free-form content.
 
 ## Conventions
 
-- HTML: 2-space indent, `<!-- ========== SECTION ========== -->` banner comments
-  between major blocks, semantic elements (`header`/`nav`/`main`/`section`/
-  `article`/`footer`), Dutch copy, `aria-label` on nav and logo links,
-  `aria-hidden="true"` on decorative glyphs. HTML entities (`&ndash;`, `&copy;`)
-  instead of literal non-ASCII.
-- CSS: BEM-ish naming — block `.section-teal`, element `.section-teal__photo`,
-  modifier `.btn--ghost` / `.hero--home`. All colours, sizes, and spacing come
-  from `--custom-properties` declared in `:root`; component sections are
-  delimited by `/* ---- Name ---- */` comments. One breakpoint only:
-  `@media (max-width: 768px)`, collected in a single block at the end of the file.
-- Per-page overrides are written as inline `style="..."` on the section (e.g.
-  `background-image`, `flex-direction: row-reverse`) rather than as new classes.
-- JS: a single `DOMContentLoaded` handler, `querySelectorAll` + `forEach`,
-  state expressed as a toggled `open` class; null-guards (`if (hamburger && …)`)
-  before wiring listeners. No error handling beyond those guards.
-- Nav: the current page's link carries `class="active"` in both the desktop
-  `.nav-links` and the `.mobile-menu` copy.
-- Bash scripts use `set -euo pipefail` and a one-line usage comment at the top.
-- No commit style is observable — the repo has zero commits.
+- **PHP**: WordPress coding standards. Tabs, not spaces. Escape on output
+  (`esc_html`, `esc_attr`, `esc_url`), never trust input. Prefix every global
+  function `even_`. `defined( 'ABSPATH' ) || exit;` at the top of every file.
+- **Templates**: keep the `<!-- ========== SECTION ========== -->` banner
+  comments from the static HTML. Semantic elements. Dutch copy.
+- **Shared-file contention**: workers run in parallel worktrees. Put new PHP
+  helpers in `inc/<area>.php` with a single `require` line in `functions.php`
+  rather than appending large blocks to `functions.php`. Append new CSS as a
+  clearly-named section rather than editing existing rules.
+- **CSS**: BEM-ish — block `.section-teal`, element `.section-teal__photo`,
+  modifier `.btn--ghost`. All colours and sizes come from the `:root` tokens.
+  One breakpoint: `@media (max-width: 768px)`.
+  **The component CSS already exists.** Most tasks need little or no new CSS —
+  check `main.css` before writing any.
+- **JS**: one `DOMContentLoaded` handler, `querySelectorAll` + `forEach`, state
+  as a toggled `open` class, null-guards before wiring listeners.
+- **Language**: the site is Dutch (`lang="nl"`). UI strings go through
+  `__( '...', 'eve-n' )`. HTML entities (`&ndash;`, `&copy;`) over literal
+  non-ASCII.
 
 ## Gotchas
 
-- The git repo has **no commits at all** and **no `.gitignore`**. `.venv/`
-  (~2500 files), `reference/`, `screenshots/`, and multi-megabyte `assets/*.webp`
-  are all untracked and unignored; a naive `git add -A` would commit them.
-- `download.sh` hardcodes an absolute `ROOT=/Users/mauro/Dev/vivera-site` and an
-  expiring Adobe CDN access token; it also writes `assets/res-*` **without a file
-  extension**, while the HTML references `assets/res-*.webp`. Files must be
-  renamed after download.
-- `assets/res-b5ce20a2.webp` (the home hero background) is 7.5 MB and
-  `res-9c128ef7.webp` is 2.4 MB; images are unoptimised full-size XD exports.
-- Changing shared chrome (header, mobile menu, footer) means editing all seven
-  HTML files — there is no include mechanism.
-- `reviews.html` is the "Projecten" page; the filename and the visible title
-  do not match.
-- Cards in `index.html` still contain lorem-ipsum placeholder copy.
-- `.venv` includes `pytesseract` (and therefore expects a system `tesseract`
-  binary), but no script in the repo calls it.
+- **`reviews.html` is the Projecten page.** It becomes the `/projecten` route;
+  the old filename is misleading.
+- **Images are unoptimised XD exports.** `res-b5ce20a2.webp` (home hero) is
+  **7.1 MB**; the set totals ~16 MB. They must go through the WordPress media
+  pipeline for `srcset` before launch. Do not ship them as raw CSS
+  `background-image` URLs.
+- **`index.html` still has lorem ipsum** in the Projecten cards, as does the
+  blog placeholder content. Real copy is pending from the client.
+- **WordPress injects block-library CSS** on every page. This is a classic
+  theme that does not use blocks on the front end — dequeue it.
+- **The nav is a real WP menu** ("Hoofdmenu") with a hardcoded fallback in
+  `even_nav_menu()`. The stylesheet targets `a.active`; WordPress marks the
+  parent `<li>`, so `even_nav_link_active_class()` copies the state onto the
+  anchor. Do not "fix" this by changing the CSS.
+- **`download.sh` is dead.** It hardcodes an absolute path and an expired Adobe
+  CDN token, and writes files without extensions. Do not run it.
+- **Deploy is FTP** to SiteGround (SSH availability unconfirmed). No build step
+  on the server, which is why the theme must be committable and runnable as-is.
