@@ -9,36 +9,30 @@ decisions and their reasoning, the conventions, and the wp-cli gotchas.
 
 ## Where things stood
 
-Merged to `main` and **live on https://staging2.eve-n.nl**:
+**Tasks 001-007 and 010 are done, merged, and live on
+https://staging2.eve-n.nl.** All eight PRs reviewed and merged.
 
-- Theme skeleton, shared chrome (`header.php` / `footer.php` / mobile menu)
-- `front-page.php` — the home page, all six sections
-- `page-onze-werkwijze.php` + `inc/hero.php` — reusable page hero
-- `home.php` / `single.php` / `inc/blog.php` — the blog, incl. the Ondertitel
-  post meta field. **This was the core requirement.**
-- `bin/deploy.sh` — rsync to staging, verified end to end incl. rollback
+Every page verified on staging — HTTP 200, zero PHP errors, no `debug.log`:
+`/`, `/onze-werkwijze/`, `/projecten/`, `/over-ons/`, `/blog/`, `/contact/`,
+and the example post. Components confirmed rendering: 5 accordion items, 2 team
+cards, 4 contact fields, the blog card grid, the real WP nav menu,
+`lang="nl-NL"`, and zero Elementor stylesheets.
 
-Verified locally before deploy: `/`, `/blog/` and a single post all return 200
-with zero PHP errors and no `debug.log`.
+`bin/seed.sh` populates a site from empty and is idempotent; `bin/deploy.sh`
+ships the theme and purges cache. Both verified against staging.
 
 ## What was in flight
 
-Dispatched on `claude-sonnet-5`, may or may not have finished:
-
-| Task | |
-|---|---|
-| 003 | Over ons + person cards |
-| 004 | Projecten accordion |
-| 005 | Contact form (real sending, nonce, validation) |
-| 007 | Seed pages, menu and settings via WP-CLI |
-
-## Not yet started
+Dispatched on `claude-sonnet-5`:
 
 | Task | |
 |---|---|
 | 008 | Images to the media pipeline (~16 MB -> under 1.5 MB) |
 | 009 | SEO + performance pass |
 | 011 | Move Ondertitel out of the collapsed Meta Boxes drawer |
+
+These are the last three. When they are merged and deployed, the build is
+feature-complete and only the operator's items below remain.
 
 ## How to continue
 
