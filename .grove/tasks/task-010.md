@@ -5,7 +5,7 @@ status: review
 priority: high
 labels: [deploy, infra]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/1"
 ---
 
 ## Description
