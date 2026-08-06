@@ -1,11 +1,11 @@
 ---
 id: task-006
 title: "Blog: index grid and single post"
-status: todo
+status: review
 priority: high
 labels: [theme, template, blog]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/3"
 ---
 
 ## Description

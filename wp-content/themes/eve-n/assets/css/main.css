@@ -1388,3 +1388,421 @@ h2 {
     max-width: none;
   }
 }
+
+/* ================================================================
+   BLOG — index grid and single post
+   Measured against reference/blogs.png and reference/blog-pagina.png:
+   card image frame 7:6 with a link-blue border, gold rule at ~85% of
+   the card, Roboto Bold card titles in sentence case. Plus the styles
+   for post bodies written in wp-admin, since anything pasted from Word
+   arrives as plain HTML the base stylesheet does not cover.
+   ================================================================ */
+
+/* ---- Hero image as an <img>, so the featured image gets srcset ---- */
+.hero--blog,
+.hero--post {
+  isolation: isolate;
+  background-color: var(--cyan-dark); /* shows when a post has no featured image */
+}
+.hero__img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero--blog::before,
+.hero--post::before {
+  z-index: 1;
+}
+
+/* ---- Blog index hero: "BLOG", left-aligned, vertically centred ---- */
+.hero--blog {
+  min-height: 320px;
+  align-items: center;
+}
+.hero--blog .hero-content {
+  width: 100%; /* otherwise the shrink-to-fit box centres a short title */
+  padding-bottom: 0;
+}
+
+/* ---- Post hero: title + Ondertitel centred over the image ---- */
+.hero--post {
+  min-height: 520px;
+  align-items: center;
+  text-align: center;
+}
+.hero--post .hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero--post h1 {
+  text-transform: none; /* post titles are sentence case, unlike page titles */
+  margin-bottom: 8px;
+}
+/* Without a featured image there is nothing to fill 520px of teal. */
+.hero--post-plain {
+  min-height: 300px;
+}
+.hero--post .hero__subtitle {
+  font-family: Menlo, 'Courier New', Courier, monospace;
+  font-size: 40px;
+  line-height: 1.3;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ---- Blog cards ---- */
+.blog-card__link {
+  display: block;
+  padding-bottom: 16px;
+  color: inherit;
+}
+.blog-card {
+  transition: transform var(--ease);
+}
+.blog-card:hover,
+.blog-card:focus-within {
+  transform: translateY(-2px);
+}
+.blog-card__img {
+  aspect-ratio: 7 / 6;
+  border: 3px solid var(--link-blue);
+  overflow: hidden;
+}
+.blog-card__img-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.blog-card__img--empty {
+  background: var(--gray-light);
+}
+.blog-card__rule {
+  width: 85%;
+}
+
+/* Card text sits inside .section-white, whose `h2` and `p` rules are more
+   specific than the single-class ones above — hence .blog-card in front. */
+.blog-card .blog-card__title {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: none;
+  line-height: 1.25;
+  display: block;
+  margin: 6px 0 2px;
+  color: var(--dark);
+}
+.blog-card .blog-card__title::before {
+  content: none; /* the gold bar belongs to section headings, not cards */
+}
+.blog-card .blog-card__date {
+  max-width: none;
+  margin: 0;
+  font-size: var(--fs-body-sm);
+  color: var(--gray);
+}
+.blog-card .blog-card__subtitle {
+  max-width: none;
+  margin: 0;
+  padding: 0 16px;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--dark);
+}
+
+/* Cards sit directly under the intro block in the design. */
+.section-white--cards {
+  padding-top: 0;
+}
+
+/* ---- Pagination ----
+   the_posts_pagination() wraps its links in a div.nav-links, the same class
+   the header navigation uses — white links on white. Reset that here.
+   WordPress runs the nav's class through sanitize_html_class(), so the
+   template passes one class, not two. */
+.blog-pagination {
+  margin-top: 48px;
+}
+.blog-pagination .nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.blog-pagination .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--cyan);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--cyan);
+  font-size: var(--fs-btn);
+  font-weight: 500;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+.blog-pagination .page-numbers::after {
+  content: none; /* the header nav's gold underline animation */
+}
+.blog-pagination a.page-numbers:hover,
+.blog-pagination a.page-numbers:focus-visible {
+  background: var(--cyan);
+  color: var(--white);
+}
+.blog-pagination .page-numbers.current {
+  background: var(--cyan);
+  border-color: var(--gold);
+  color: var(--white);
+}
+.blog-pagination .page-numbers.dots {
+  border-color: transparent;
+  background: none;
+  color: var(--gray);
+}
+
+/* ================================================================
+   POST BODY — content written in wp-admin
+   Headings are Roboto here, not the uppercase Menlo of the page
+   furniture: an author's h2 is a sentence, not a label. Lists, quotes
+   and tables read left-aligned inside the centred column.
+   ================================================================ */
+.article-body h1,
+.article-body h2,
+.article-body h3,
+.article-body h4,
+.article-body h5,
+.article-body h6 {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  text-transform: none;
+  line-height: 1.3;
+  color: var(--dark);
+  margin: 40px 0 12px;
+}
+.article-body h2 {
+  /* .section-white h2 is a labelled section heading: gold bar, inline-block.
+     An author's heading is neither. */
+  display: block;
+}
+.article-body h2::before {
+  content: none;
+}
+.article-body > :first-child {
+  margin-top: 0;
+}
+.article-body h1 { font-size: 36px; }
+.article-body h2 { font-size: 30px; }
+.article-body h3 { font-size: 25px; }
+.article-body h4 { font-size: 22px; }
+.article-body h5,
+.article-body h6 { font-size: 20px; }
+
+.article-body strong,
+.article-body b { font-weight: 700; }
+.article-body em,
+.article-body i { font-style: italic; }
+.article-body u { text-decoration: underline; }
+.article-body s,
+.article-body del { text-decoration: line-through; }
+.article-body sub,
+.article-body sup { font-size: 0.7em; }
+
+.article-body a {
+  color: var(--link-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--ease);
+}
+.article-body a:hover,
+.article-body a:focus-visible {
+  color: var(--cyan);
+}
+
+/* The global reset drops list markers; editor content needs them back. */
+.article-body ul,
+.article-body ol {
+  max-width: 640px;
+  margin: 0 auto var(--gap);
+  padding-left: 24px;
+  text-align: left;
+}
+.article-body ul { list-style: disc outside; }
+.article-body ol { list-style: decimal outside; }
+.article-body li { margin-bottom: 8px; }
+.article-body li > ul,
+.article-body li > ol {
+  max-width: none;
+  margin: 8px 0 0;
+}
+.article-body ul ul { list-style: circle outside; }
+
+.article-body blockquote {
+  max-width: 640px;
+  margin: var(--gap) auto;
+  padding: 4px 0 4px 24px;
+  border-left: 4px solid var(--gold);
+  text-align: left;
+  color: var(--dark-secondary);
+}
+.article-body blockquote p:last-child { margin-bottom: 0; }
+.article-body cite {
+  display: block;
+  font-size: var(--fs-body-sm);
+  font-style: normal;
+  color: var(--gray);
+}
+
+.article-body img {
+  margin: 0 auto;
+  border-radius: var(--radius-img);
+}
+.article-body figure {
+  margin: var(--gap) auto;
+}
+.article-body figcaption,
+.article-body .wp-caption-text {
+  margin-top: 8px;
+  font-size: var(--fs-body-sm);
+  color: var(--gray);
+}
+.article-body iframe,
+.article-body video,
+.article-body embed,
+.article-body object {
+  max-width: 100%;
+}
+
+.article-body table {
+  width: 100%;
+  margin-bottom: var(--gap);
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--fs-body-sm);
+}
+.article-body th,
+.article-body td {
+  padding: 10px 12px;
+  border: 1px solid var(--gray-light);
+}
+.article-body th {
+  font-weight: 700;
+  background: var(--gray-light);
+}
+
+.article-body hr {
+  width: 80px;
+  height: 3px;
+  margin: 40px auto;
+  border: none;
+  background: var(--gold);
+}
+.article-body code,
+.article-body kbd,
+.article-body pre {
+  font-family: Menlo, 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+.article-body code,
+.article-body kbd {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--gray-light);
+}
+.article-body pre {
+  margin-bottom: var(--gap);
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: var(--gray-light);
+  text-align: left;
+  overflow-x: auto;
+}
+.article-body pre code {
+  padding: 0;
+  background: none;
+}
+.article-body > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Blog mobile: the design drops both hero images and puts the title in
+   dark type with the gold accent bar, as on the other phone artboards. ---- */
+@media (max-width: 768px) {
+  .blog-card__title {
+    font-size: 20px;
+  }
+  .blog-card__subtitle {
+    font-size: var(--fs-body-sm);
+  }
+
+  .hero--blog,
+  .hero--post {
+    min-height: 0;
+    padding: 28px 0 4px;
+    background-color: var(--white);
+    color: var(--dark);
+    text-align: left;
+    align-items: flex-start;
+  }
+  .hero--blog .hero__img,
+  .hero--post .hero__img {
+    display: none;
+  }
+  .hero--blog::before,
+  .hero--post::before {
+    display: none;
+  }
+  .hero--blog .hero-content,
+  .hero--post .hero-content {
+    align-items: flex-start;
+    padding-bottom: 0;
+    text-align: left;
+  }
+  .hero--blog h1,
+  .hero--post h1 {
+    position: relative;
+    padding-left: 14px;
+    color: var(--dark);
+  }
+  .hero--post h1 {
+    /* Post titles are written by the client and can be long. */
+    font-size: 32px;
+    overflow-wrap: anywhere;
+  }
+  .hero--blog h1::before,
+  .hero--post h1::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 5px;
+    background: var(--gold);
+  }
+  .hero--post .hero__subtitle {
+    font-size: 22px;
+    color: var(--dark);
+    text-align: left;
+  }
+
+  .article-body h1 { font-size: 26px; }
+  .article-body h2 { font-size: 23px; }
+  .article-body h3 { font-size: 20px; }
+  .article-body h4,
+  .article-body h5,
+  .article-body h6 { font-size: 18px; }
+  .article-body ul,
+  .article-body ol,
+  .article-body blockquote {
+    max-width: none;
+  }
+}
