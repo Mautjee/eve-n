@@ -92,8 +92,46 @@ so edits are live on refresh.
 **Working in a Grove worktree?** Port 8888 belongs to the main checkout. Each
 worktree gets a gitignored `.wp-env.override.json` assigning it a free port —
 `wp-env start` picks it up automatically and prints the real URL. Use that URL,
-not 8888. If the file is missing, create it:
-`{"port": 88NN, "testsPort": 89NN}`.
+not 8888. If the file is missing, create it — and include the `config` block,
+not just the ports: `.wp-env.json`'s `WP_HOME`/`WP_SITEURL` are hard-coded to
+`8888`, and without overriding both here too, WordPress 301-redirects every
+request back to the main checkout's port and pretty permalinks 404.
+
+```json
+{
+  "port": 88NN,
+  "testsPort": 89NN,
+  "config": {
+    "WP_SITEURL": "http://localhost:88NN",
+    "WP_HOME": "http://localhost:88NN"
+  }
+}
+```
+
+### Seeding content
+
+`bin/seed.sh` takes an empty install to a fully populated eve-n.nl: the six
+pages (content transcribed verbatim from `reference/catalog-*.md`), the
+"Hoofdmenu" assigned to the `primary` location, site title/tagline/timezone/
+locale/permalinks, one example blog post, and it deletes the WordPress
+defaults ("Hello world!", the sample page, the default comment). It runs
+`bin/seed.php` inside WordPress via `wp eval-file -`, piped over stdin — no
+files need to be copied onto the target first.
+
+```
+bin/seed.sh                # local wp-env (default)
+bin/seed.sh --staging      # staging2.eve-n.nl over SSH, needs .env
+bin/seed.sh --production   # live site over SSH, asks for a typed confirmation
+```
+
+It's idempotent — every step checks before it creates, so a second run logs
+"already exists" / "already set" throughout and changes nothing. Safe to run
+after a client has started editing pages: it never touches a page, the menu
+or the example post once they exist, only ever creates the ones that are
+missing. Page templates from tasks 001-006 are picked up automatically
+through WordPress's `page-{slug}.php` hierarchy — this script never assigns
+one, so a page whose template hasn't landed yet just renders through
+`index.php` until it does.
 
 There is **no build step and no test framework.** Verification is visual:
 screenshot at 1920 and 393 and compare against `reference/`.
