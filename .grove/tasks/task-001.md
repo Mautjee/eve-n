@@ -1,7 +1,7 @@
 ---
 id: task-001
 title: "Home page template (front-page.php)"
-status: in-progress
+status: review
 priority: high
 labels: [theme, template]
 created: 2026-08-07
