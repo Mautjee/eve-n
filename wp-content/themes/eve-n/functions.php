@@ -9,6 +9,9 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'EVEN_VERSION', '0.1.0' );
 
+/** Blog: the "Ondertitel" post meta field and the blog index query. */
+require_once get_theme_file_path( 'inc/blog.php' );
+
 /**
  * Theme supports and menu registration.
  */
