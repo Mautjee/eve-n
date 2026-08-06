@@ -70,6 +70,12 @@ Site: `http://localhost:8888`. Admin: `http://localhost:8888/wp-admin`
 (`admin` / `password`). The theme is mounted from `wp-content/themes/eve-n`,
 so edits are live on refresh.
 
+**Working in a Grove worktree?** Port 8888 belongs to the main checkout. Each
+worktree gets a gitignored `.wp-env.override.json` assigning it a free port —
+`wp-env start` picks it up automatically and prints the real URL. Use that URL,
+not 8888. If the file is missing, create it:
+`{"port": 88NN, "testsPort": 89NN}`.
+
 There is **no build step and no test framework.** Verification is visual:
 screenshot at 1920 and 393 and compare against `reference/`.
 
