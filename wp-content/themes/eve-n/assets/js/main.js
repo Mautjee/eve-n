@@ -44,6 +44,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /* ---- Accordion: aria-expanded + "+"/"−" toggle text ----
+     A second, additive listener (rather than editing the block above) so the
+     existing open/close logic stays untouched. Runs after it, since it is
+     registered after it, so it can read the class state the first listener
+     just set. */
+  document.querySelectorAll('.accordion__header').forEach((header) => {
+    header.addEventListener('click', () => {
+      const group = header.closest('.accordion');
+      const headers = group ? group.querySelectorAll('.accordion__header') : [header];
+      headers.forEach((h) => {
+        const isOpen = h.closest('.accordion__item').classList.contains('open');
+        h.setAttribute('aria-expanded', String(isOpen));
+        const toggle = h.querySelector('.accordion__toggle');
+        if (toggle) toggle.textContent = isOpen ? '−' : '+';
+      });
+    });
+  });
+
   /* ---- Projecten card toggle (mobile: same accordion behavior) ---- */
   document.querySelectorAll('.card__icon--plus').forEach((icon) => {
     icon.addEventListener('click', (e) => {

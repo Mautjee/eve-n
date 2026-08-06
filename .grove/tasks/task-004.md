@@ -1,7 +1,7 @@
 ---
 id: task-004
 title: "Projecten page: accordion from page content"
-status: in-progress
+status: review
 priority: medium
 labels: [theme, template]
 created: 2026-08-07

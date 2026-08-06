@@ -15,6 +15,9 @@ require_once get_theme_file_path( 'inc/hero.php' );
 /** Blog: the "Ondertitel" post meta field and the blog index query. */
 require_once get_theme_file_path( 'inc/blog.php' );
 
+/** Projecten: turns page-content headings into accordion items. */
+require_once get_theme_file_path( 'inc/accordion.php' );
+
 /**
  * Theme supports and menu registration.
  */
