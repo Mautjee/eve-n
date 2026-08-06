@@ -15,6 +15,9 @@ require_once get_theme_file_path( 'inc/hero.php' );
 /** Blog: the "Ondertitel" post meta field and the blog index query. */
 require_once get_theme_file_path( 'inc/blog.php' );
 
+/** Over Ons: the team member cards. */
+require_once get_theme_file_path( 'inc/team.php' );
+
 /**
  * Theme supports and menu registration.
  */

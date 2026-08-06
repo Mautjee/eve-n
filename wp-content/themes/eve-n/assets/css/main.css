@@ -711,17 +711,23 @@ h2 {
   line-height: 1.6;
 }
 
-/* ---- Team Cards (Over Ons) ---- */
+/* ---- Team Cards (Over Ons) ----
+   reference/over-ons.png measures the two cards at ~750 CSS px each with a
+   ~56px gap, spanning most of the 1920 viewport — wider than the standard
+   1200px .container, hence the grid sets its own max-width rather than
+   sitting inside one (matching .intro-block and .article-body, which do the
+   same for their sections). */
 .team-grid {
   display: flex;
-  gap: 40px;
+  gap: 56px;
   justify-content: center;
-  margin-top: var(--gap);
+  max-width: 1600px;
+  margin: var(--gap) auto 0;
+  padding: 0 var(--gap);
   text-align: left;
 }
 .team-card {
   flex: 1;
-  max-width: 500px;
   border: 2px solid var(--cyan);
   border-radius: var(--radius-card);
   padding: 28px;
@@ -734,12 +740,14 @@ h2 {
 .team-card__img {
   width: 100%;
   border-radius: var(--radius-img);
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
 }
 .team-card__name {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-size: 24px;
   font-weight: 700;
+  text-transform: none;
   color: var(--dark);
 }
 .team-card__bio {
