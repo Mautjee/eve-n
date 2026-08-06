@@ -1806,3 +1806,28 @@ h2 {
     max-width: none;
   }
 }
+
+/* ---- Contact form feedback (task-005) ---- */
+.form-notice {
+  margin-bottom: var(--gap);
+  padding: 16px 24px;
+  border-radius: var(--radius-card);
+  font-size: var(--fs-body);
+  text-align: left;
+}
+.form-notice--success {
+  background: #E6F7EC;
+  color: #1A7F3C;
+  border: 2px solid #1A7F3C;
+}
+.form-notice--error {
+  background: #FBEAEA;
+  color: #C0392B;
+  border: 2px solid #C0392B;
+}
+.form-field-error {
+  color: #C0392B;
+  font-size: var(--fs-body-sm);
+  text-align: left;
+}
+}

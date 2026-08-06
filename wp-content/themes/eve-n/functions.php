@@ -15,6 +15,9 @@ require_once get_theme_file_path( 'inc/hero.php' );
 /** Blog: the "Ondertitel" post meta field and the blog index query. */
 require_once get_theme_file_path( 'inc/blog.php' );
 
+/** Contact page: the admin-post form handler. */
+require_once get_theme_file_path( 'inc/contact-form.php' );
+
 /**
  * Theme supports and menu registration.
  */
