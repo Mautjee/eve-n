@@ -1,7 +1,7 @@
 ---
 id: task-010
-title: "Deploy to SiteGround staging"
-status: blocked
+title: "Deploy script and cutover runbook"
+status: todo
 priority: medium
 labels: [deploy, infra]
 created: 2026-08-07
@@ -10,33 +10,42 @@ pr: ""
 
 ## Description
 
-**SSH is available** — `ssh.eve-n.nl`, port 18765, user in `.env`. Deploy with
-`rsync -avz --delete` over SSH; no FTP needed.
+SSH works and is verified. Connection settings are in `.env` (gitignored; copy
+`.env.example` if missing). Publickey auth only — no password.
 
-**BLOCKED** on one thing: SiteGround accepts **publickey auth only** (password
-auth is refused outright), and no key on this machine is registered with it.
-The operator must add a public key in Site Tools > Devs > SSH Keys Manager
-before an agent can connect. Connection settings are in `.env`; copy
-`.env.example` if it is missing.
+**Server facts, confirmed 2026-08-07:**
 
-Once connected, confirm the remote themes path and record it in `.env`:
+- PHP **8.2.33**, WordPress **7.0.2**, `wp-cli` at `/usr/local/bin/wp`
+- Themes: `/home/u2072-mbcxascz03lu/www/eve-n.nl/public_html/wp-content/themes`
+- Active theme: **astra**
+- Plugins: `elementor`, `sg-ai-studio`, `envato-elements`, `gtranslate`,
+  `loco-translate`, `sg-security`, `sg-cachepress`
+- **There is no staging site** — only `eve-n.nl` exists
 
-```
-ssh -p $SG_PORT $SG_USER@$SG_HOST 'ls -d ~/www/*/public_html/wp-content/themes'
-```
+Local `wp-env` runs PHP 8.2 to match production. Keep it that way.
 
-Then: write `bin/deploy.sh` that pushes **only** `wp-content/themes/eve-n/` to
-the SiteGround **staging** site. It must never touch `wp-content/uploads`,
-plugins, or WordPress core, and must never target production without an
-explicit flag and a confirmation prompt.
+Write `bin/deploy.sh` that rsyncs **only** `wp-content/themes/eve-n/` to the
+server. It must never touch `wp-content/uploads`, plugins, or WordPress core.
 
-Also document the cutover: the live site currently runs a different design on
-the Astra theme under the "Eve(N)|n=3" branding. Switching themes changes the
-whole site at once, so the runbook needs a rollback step.
+Because there is no staging site, the theme deploys **inactive** — uploading it
+changes nothing visible, and the switch happens only at cutover. That is the
+safety mechanism; do not activate from the script by default.
 
-Confirm before building: does anything on the current live site need to
-survive — the GDQ copy, the three client logos, the existing portrait? None of
-it appears in the XD design.
+**Cutover risks to work through in the runbook:**
+
+- **Elementor is active**, so the current pages are probably Elementor
+  documents. Switching themes may orphan that content. Establish what breaks
+  *before* switching, not after.
+- `sg-cachepress` caches aggressively — the cutover must purge it or the change
+  will not appear.
+- `gtranslate` may inject markup into the new theme's pages; check it.
+- Rollback is `wp theme activate astra` plus a cache purge. Test it.
+
+Take a **full backup** (files + database) before the first activation.
+
+Confirm with the operator before cutover: does anything on the current live
+site need to survive — the GDQ copy, the three client logos, the existing
+portrait? None of it appears in the XD design.
 
 ## Acceptance Criteria
 
