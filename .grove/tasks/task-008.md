@@ -1,7 +1,7 @@
 ---
 id: task-008
 title: "Move images to the WordPress media pipeline"
-status: todo
+status: in-progress
 priority: high
 labels: [performance, images]
 created: 2026-08-07
