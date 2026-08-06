@@ -1,11 +1,11 @@
 ---
 id: task-010
 title: "Deploy script and staging cutover"
-status: todo
+status: review
 priority: high
 labels: [deploy, infra]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/1"
 ---
 
 ## Description
@@ -56,13 +56,13 @@ Document the deploy and rollback commands in AGENTS.md. Rollback is
 
 ## Acceptance Criteria
 
-- [ ] `bin/deploy.sh` transfers the theme folder to staging and nothing else
-- [ ] Credentials come from `.env`; nothing secret is committed
-- [ ] `--dry-run` works and transfers nothing
-- [ ] Production requires `--production` plus confirmation; verify by running
+- [x] `bin/deploy.sh` transfers the theme folder to staging and nothing else
+- [x] Credentials come from `.env`; nothing secret is committed
+- [x] `--dry-run` works and transfers nothing
+- [x] Production requires `--production` plus confirmation; verify by running
       without the flag and observing it target staging
-- [ ] Theme deployed and activated on `https://staging2.eve-n.nl`, confirmed
+- [x] Theme deployed and activated on `https://staging2.eve-n.nl`, confirmed
       serving the eve-n theme rather than astra
-- [ ] Cache purge runs and the change is visible without a manual purge
-- [ ] Rollback to astra tested on staging and documented
-- [ ] Deploy and rollback documented in AGENTS.md
+- [x] Cache purge runs and the change is visible without a manual purge
+- [x] Rollback to astra tested on staging and documented
+- [x] Deploy and rollback documented in AGENTS.md
