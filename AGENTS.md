@@ -13,7 +13,12 @@ Blog index, Blog post, Contact.
 
 **What is live today is not this site.** `eve-n.nl` currently runs an older
 design on the Astra theme under the branding "Eve(N)|n=3", with no blog. This
-project replaces it.
+project replaces it entirely.
+
+**The old site is disposable.** The operator has confirmed nothing on it needs
+to be preserved — not the Elementor pages, not the GDQ copy, not the client
+logos. Do not plan content migration or spend effort keeping the old theme
+working. Staging (`https://staging2.eve-n.nl`) may be broken freely.
 
 ## Why WordPress
 
