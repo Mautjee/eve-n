@@ -1814,3 +1814,14 @@ h2 {
     max-width: none;
   }
 }
+
+/* ================================================================
+   Projecten — accordion toggle shows a real "−", not a rotated "+"
+   reference/phone-projecten.png draws the open state as a plain minus.
+   main.js now swaps the glyph's text content on open/close, so the
+   rotate() this component used as a stand-in (a "+" rotated 45° reads as
+   "×", not "−") is no longer needed for that item.
+   ================================================================ */
+.accordion__item.open .accordion__toggle {
+  transform: none;
+}

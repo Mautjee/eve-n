@@ -1,11 +1,11 @@
 ---
 id: task-004
 title: "Projecten page: accordion from page content"
-status: todo
+status: review
 priority: medium
 labels: [theme, template]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/5"
 ---
 
 ## Description

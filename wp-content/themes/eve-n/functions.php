@@ -18,6 +18,9 @@ require_once get_theme_file_path( 'inc/blog.php' );
 /** Over Ons: the team member cards. */
 require_once get_theme_file_path( 'inc/team.php' );
 
+/** Projecten: turns page-content headings into accordion items. */
+require_once get_theme_file_path( 'inc/accordion.php' );
+
 /**
  * Theme supports and menu registration.
  */
