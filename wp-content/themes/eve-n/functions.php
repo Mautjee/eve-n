@@ -21,6 +21,9 @@ require_once get_theme_file_path( 'inc/team.php' );
 /** Projecten: turns page-content headings into accordion items. */
 require_once get_theme_file_path( 'inc/accordion.php' );
 
+/** Contact page: the admin-post form handler. */
+require_once get_theme_file_path( 'inc/contact-form.php' );
+
 /**
  * Theme supports and menu registration.
  */

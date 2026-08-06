@@ -1,7 +1,7 @@
 ---
 id: task-005
 title: "Contact page: form and contact blocks"
-status: todo
+status: review
 priority: medium
 labels: [theme, template, forms]
 created: 2026-08-07
@@ -31,12 +31,12 @@ Do not install a form plugin for this — four fields do not justify one.
 
 ## Acceptance Criteria
 
-- [ ] Form renders per `reference/contact.png`; stacks on mobile
+- [x] Form renders per `reference/contact.png`; stacks on mobile
       (`phone-contact.png`)
-- [ ] Submitting a valid form sends mail and shows a Dutch success message
-- [ ] Invalid input redisplays the form with Dutch errors and preserves what
+- [x] Submitting a valid form sends mail and shows a Dutch success message
+- [x] Invalid input redisplays the form with Dutch errors and preserves what
       was typed
-- [ ] Nonce verified; missing or bad nonce is rejected
-- [ ] Submitted values are escaped on output; no XSS via any field
-- [ ] Inputs have real `<label>`s (visually hidden is fine) — placeholders
+- [x] Nonce verified; missing or bad nonce is rejected
+- [x] Submitted values are escaped on output; no XSS via any field
+- [x] Inputs have real `<label>`s (visually hidden is fine) — placeholders
       alone are not accessible
