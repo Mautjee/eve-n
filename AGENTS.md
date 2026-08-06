@@ -89,6 +89,60 @@ screenshot at 1920 and 393 and compare against `reference/`.
 .venv/bin/python crop.py reference/home.png X Y W H out.png 3.0 # zoom
 ```
 
+## Deploy
+
+`bin/deploy.sh` rsyncs **only** `wp-content/themes/eve-n/` over SSH and then
+purges the SG Optimizer cache. It never writes to uploads, plugins or core.
+There is no build step on the server — what is committed is what runs.
+
+Connection settings come from `.env` in the repo root (gitignored; copy
+`.env.example`). SiteGround accepts publickey auth only.
+
+| Target | URL | Path |
+|---|---|---|
+| Staging (default) | `https://staging2.eve-n.nl` | `~/www/staging2.eve-n.nl/public_html` |
+| Production (`--production`) | `http://eve-n.nl` | `~/www/eve-n.nl/public_html` |
+
+```
+./bin/deploy.sh --dry-run          # show what would transfer, change nothing
+./bin/deploy.sh                    # upload to staging + purge cache
+./bin/deploy.sh --activate         # upload, activate eve-n, purge cache
+./bin/deploy.sh --production       # live site; asks you to type a confirmation
+```
+
+**Staging is the default.** No flag means staging. Production needs
+`--production` *and* typing `deploy production` at the prompt, so it cannot
+happen from a script or by accident.
+
+`--delete` is on, scoped inside `themes/eve-n/`. A file deleted locally is
+deleted on the server. Sibling themes are never in scope. Excluded from
+transfer: `.git*`, `node_modules`, `.wp-env*`, `*.map`, `.DS_Store`, `*.swp`.
+
+### Rollback
+
+Switch back to the old Astra site and purge. Substitute `eve-n.nl` for
+`staging2.eve-n.nl` to roll back production.
+
+```
+source .env
+ssh -i "${SG_KEY/#\~/$HOME}" -p "$SG_PORT" "$SG_USER@$SG_HOST" \
+  'cd ~/www/staging2.eve-n.nl/public_html && wp theme activate astra && wp sg purge'
+```
+
+The theme files stay on the server; only the active theme changes, so rolling
+forward again is `./bin/deploy.sh --activate`.
+
+### Notes
+
+- **Always purge.** SG Optimizer caches HTML and concatenates assets. The
+  script purges for you; a manual upload over SFTP will look like it did
+  nothing.
+- macOS ships `openrsync`, which has no `--chmod`. The script detects this and
+  says so. File modes then come from your checkout — a normal `git clone` gives
+  the right ones.
+- Verified end-to-end against staging on 2026-08-07: transfer, activate, purge,
+  rollback to `astra`, and roll forward again.
+
 ## Content architecture
 
 Which parts are editable in `wp-admin` versus fixed in a template. Follow this —
@@ -146,5 +200,9 @@ free-form content.
   anchor. Do not "fix" this by changing the CSS.
 - **`download.sh` is dead.** It hardcodes an absolute path and an expired Adobe
   CDN token, and writes files without extensions. Do not run it.
-- **Deploy is FTP** to SiteGround (SSH availability unconfirmed). No build step
-  on the server, which is why the theme must be committable and runnable as-is.
+- **Deploy is SSH + rsync**, not FTP. Use `bin/deploy.sh` — see [Deploy](#deploy).
+  There is no build step on the server, which is why the theme must be
+  committable and runnable as-is.
+- **SG Optimizer caches aggressively.** If a change does not show on staging,
+  the cache is the first suspect, not your code. `bin/deploy.sh` purges after
+  every upload.
