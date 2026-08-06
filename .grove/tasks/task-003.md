@@ -1,7 +1,7 @@
 ---
 id: task-003
 title: "Over ons page template with person cards"
-status: in-progress
+status: review
 priority: medium
 labels: [theme, template]
 created: 2026-08-07
