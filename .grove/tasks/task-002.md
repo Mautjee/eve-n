@@ -1,11 +1,11 @@
 ---
 id: task-002
 title: "Onze Werkwijze page template"
-status: todo
+status: review
 priority: high
 labels: [theme, template]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/4"
 ---
 
 ## Description

@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 define( 'EVEN_VERSION', '0.1.0' );
 
 require_once get_theme_file_path( 'inc/links.php' );
+require_once get_theme_file_path( 'inc/hero.php' );
 
 /**
  * Theme supports and menu registration.
