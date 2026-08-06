@@ -1,7 +1,7 @@
 ---
 id: task-005
 title: "Contact page: form and contact blocks"
-status: todo
+status: in-progress
 priority: medium
 labels: [theme, template, forms]
 created: 2026-08-07
