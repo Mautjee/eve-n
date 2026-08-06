@@ -1139,3 +1139,197 @@ h2 {
   color: var(--gray);
   text-align: center;
 }
+
+/* ================================================================
+   Page hero with a featured image  (task-002)
+
+   The XD subpage artboards (reference/onze-werkwijze.png,
+   reference/over-ons.png) place the title left-aligned against a
+   68px viewport gutter and vertically centred over the photograph,
+   in a 332px-tall band. The base .hero rules centre their content
+   and pin it to the bottom, so the geometry is corrected here
+   rather than by editing those shared rules.
+
+   The photograph is a real <img> so WordPress can serve srcset and
+   sizes, which a CSS background cannot. .hero::before is the 45%
+   scrim measured off the artboard; it is generated as the first
+   child, so it needs lifting above the positioned <img> sibling.
+   ================================================================ */
+
+.hero--page {
+  min-height: 332px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.hero--page .hero-content {
+  max-width: none;
+  width: 100%;
+  padding: 0 68px;
+}
+.hero--photo::before {
+  z-index: 1;
+}
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The aerial photographs are cropped to their lower edge in the
+     design — that is where the people are. */
+  object-position: center bottom;
+}
+
+/* ================================================================
+   Page body — content written in the editor
+
+   One centred column on white. 975px at --fs-body reproduces the
+   line breaks of the 1460px / 30px column on the 1920px artboard.
+   ================================================================ */
+
+.page-body {
+  position: relative;
+  padding: var(--section-pad) var(--gap);
+  background: var(--white);
+  text-align: left;
+}
+.page-body__inner {
+  max-width: 975px;
+  margin: 0 auto;
+}
+
+/* ---- Editor content: the_content() output ----
+   Headings, lists, links and images written in wp-admin, plus the
+   list chrome the reset removes. Shared by every template that
+   prints the_content(). */
+.entry-content {
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--dark);
+}
+.entry-content > *:first-child {
+  margin-top: 0;
+}
+.entry-content > *:last-child {
+  margin-bottom: 0;
+}
+.entry-content p,
+.entry-content ul,
+.entry-content ol,
+.entry-content figure,
+.entry-content blockquote,
+.entry-content table,
+.entry-content pre {
+  margin-bottom: var(--gap);
+}
+.entry-content h2 {
+  font-size: var(--fs-section-heading);
+  margin: calc(var(--gap) * 1.5) 0 var(--gap);
+}
+.entry-content h3 {
+  font-size: 28px;
+  margin: var(--gap) 0 12px;
+}
+.entry-content h4,
+.entry-content h5,
+.entry-content h6 {
+  font-size: 22px;
+  margin: var(--gap) 0 12px;
+}
+.entry-content ul,
+.entry-content ol {
+  padding-left: 1.4em;
+}
+.entry-content ul {
+  list-style: disc;
+}
+.entry-content ol {
+  list-style: decimal;
+}
+.entry-content li {
+  margin-bottom: 8px;
+}
+.entry-content li > ul,
+.entry-content li > ol {
+  margin: 8px 0 0;
+}
+.entry-content a {
+  color: var(--link-blue);
+  text-decoration: underline;
+}
+.entry-content a:hover {
+  color: var(--cyan);
+}
+.entry-content blockquote {
+  padding-left: var(--gap);
+  border-left: 4px solid var(--gold);
+  color: var(--gray);
+}
+.entry-content img {
+  border-radius: var(--radius-img);
+}
+.entry-content figcaption {
+  margin-top: 8px;
+  font-size: var(--fs-body-sm);
+  color: var(--gray);
+  text-align: center;
+}
+.entry-content hr {
+  margin: var(--section-pad) 0;
+  border: 0;
+  border-top: 1px solid var(--gray-light);
+}
+.entry-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body-sm);
+}
+.entry-content th,
+.entry-content td {
+  padding: 8px 12px;
+  border: 1px solid var(--gray-light);
+  text-align: left;
+}
+.entry-content pre {
+  overflow-x: auto;
+  padding: var(--gap);
+  background: var(--gray-light);
+  border-radius: var(--radius-card);
+  font-size: var(--fs-body-sm);
+}
+
+/* ---- Mobile: the phone artboards drop the hero photograph ----
+   reference/phone-onze-werkwijze.png, phone-over-ons.png and
+   phone-blog.png all show the title as a dark heading with a gold
+   rule on white, with no photograph, and centre the body copy. */
+@media (max-width: 768px) {
+  .hero--page {
+    min-height: 0;
+    padding: 14px 0 0;
+    background: var(--white);
+    color: var(--dark);
+  }
+  .hero--page::before,
+  .hero--page .hero__media {
+    display: none;
+  }
+  .hero--page .hero-content {
+    padding: 0 var(--gap);
+  }
+  .hero--page .hero-content h1 {
+    padding-left: 8px;
+    border-left: 4px solid var(--gold);
+    font-size: 28px;
+    color: var(--dark);
+  }
+
+  .page-body {
+    text-align: center;
+  }
+  .page-body__inner {
+    max-width: none;
+  }
+}
