@@ -1,7 +1,7 @@
 ---
 id: task-010
 title: "Deploy script and staging cutover"
-status: todo
+status: in-progress
 priority: high
 labels: [deploy, infra]
 created: 2026-08-07
