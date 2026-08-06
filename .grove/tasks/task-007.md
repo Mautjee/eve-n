@@ -1,7 +1,7 @@
 ---
 id: task-007
 title: "Seed pages, menu and site settings via WP-CLI"
-status: todo
+status: review
 priority: medium
 labels: [content, wp-cli]
 created: 2026-08-07
