@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — EVE-N</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="nav-logo" aria-label="Home">
+        <img src="assets/res-7939c42a.webp" alt="EVE-N" width="28" height="28">
+      </a>
+      <nav class="nav-links" aria-label="Hoofdmenu">
+        <a href="onze-werkwijze.html">Werkwijze</a>
+        <a href="reviews.html">Projecten</a>
+        <a href="over-ons.html">Over ons</a>
+        <a href="blogs.html">Blog</a>
+        <a href="contact.html" class="active">Contact</a>
+      </nav>
+      <button class="hamburger" aria-label="Menu openen">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="mobile-menu" aria-label="Mobiel menu">
+    <a href="onze-werkwijze.html">Werkwijze</a>
+    <a href="reviews.html">Projecten</a>
+    <a href="over-ons.html">Over ons</a>
+    <a href="blogs.html">Blog</a>
+    <a href="contact.html" class="active">Contact</a>
+  </nav>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="hero hero--page" style="background-image: url('assets/res-b5ce20a2.webp');">
+      <div class="hero-content">
+        <h1>Contact</h1>
+      </div>
+    </section>
+
+    <!-- Form Section -->
+    <section class="section-white">
+      <div class="container">
+        <form class="contact-layout" action="#" method="post">
+          <div class="contact-form">
+            <input type="text" name="naam" placeholder="Naam" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="onderwerp" placeholder="Onderwerp">
+          </div>
+          <div class="contact-form">
+            <textarea name="bericht" placeholder="Text" required></textarea>
+          </div>
+        </form>
+        <button type="submit" class="btn btn--fill" style="margin-top: 24px;">Send</button>
+      </div>
+    </section>
+
+    <!-- Contact Persons -->
+    <section class="section-white blob-decor blob-decor--left" style="text-align: left;">
+      <div class="container">
+        <div class="contact-persons">
+          <div class="contact-person">
+            <img class="contact-person__img" src="assets/res-a4f7313d.webp" alt="Thomas Vilain">
+            <div>
+              <p class="contact-person__name">Thomas Vilain</p>
+              <p class="contact-person__detail">T.vilain@eve-n.nl</p>
+              <p class="contact-person__detail">+31 6 81 44 02 25</p>
+            </div>
+          </div>
+          <div class="contact-person">
+            <img class="contact-person__img" src="assets/res-3d8c2aeb.webp" alt="Eveline Hinfelaar">
+            <div>
+              <p class="contact-person__name">Eveline Hinfelaar</p>
+              <p class="contact-person__detail">E.hinfelaar@eve-n.nl</p>
+              <p class="contact-person__detail">+31 6 24 65 68 33</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>&copy; 2025 EVE-N</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

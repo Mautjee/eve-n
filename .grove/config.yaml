@@ -1,0 +1,10 @@
+workspace:
+    label: vivera-site
+    scope: repo
+repos:
+    vivera-site:
+        path: /Users/mauro/Dev/vivera-site
+        base: main
+        claude: claude --dangerously-skip-permissions
+provider:
+    kind: markdown

@@ -1,0 +1,39 @@
+# Python virtualenv used only by the reference tooling (slice.py / crop.py)
+.venv/
+__pycache__/
+*.pyc
+
+# Node / local WordPress environment
+node_modules/
+.wp-env.override.json
+
+# Local WordPress core + uploads — only wp-content/themes/eve-n is ours
+wp/
+wordpress/
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/plugins/
+!wp-content/themes/eve-n/
+
+# Build output
+dist/
+build/
+
+# Browser screenshots — regenerated on demand, multi-MB each
+screenshots/
+
+# Secrets: FTP/SSH credentials, DB config
+.env
+.env.*
+!.env.example
+deploy.conf
+wp-config-local.php
+
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp

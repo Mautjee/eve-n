@@ -1,0 +1,17 @@
+{
+  "name": "eve-n-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WordPress theme for eve-n.nl, built from the Adobe XD design in reference/",
+  "scripts": {
+    "start": "wp-env start",
+    "stop": "wp-env stop",
+    "destroy": "wp-env destroy",
+    "clean": "wp-env clean all",
+    "logs": "wp-env logs",
+    "cli": "wp-env run cli wp"
+  },
+  "devDependencies": {
+    "@wordpress/env": "^10.0.0"
+  }
+}

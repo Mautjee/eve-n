@@ -1,0 +1,15 @@
+/*
+Theme Name: EVE-N
+Theme URI: https://eve-n.nl
+Author: Eve-n
+Description: Custom theme for EVE-N, built from the Adobe XD design. No page builder, no framework — hand-written templates over the original design tokens.
+Version: 0.1.0
+Requires at least: 6.5
+Tested up to: 7.0
+Requires PHP: 8.0
+License: GPL-2.0-or-later
+Text Domain: eve-n
+*/
+
+/* The full stylesheet lives in assets/css/main.css and is enqueued from
+   functions.php. This file exists for the theme header above. */
