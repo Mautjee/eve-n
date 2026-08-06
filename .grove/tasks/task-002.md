@@ -1,7 +1,7 @@
 ---
 id: task-002
 title: "Onze Werkwijze page template"
-status: todo
+status: in-progress
 priority: high
 labels: [theme, template]
 created: 2026-08-07
