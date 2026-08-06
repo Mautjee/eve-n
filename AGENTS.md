@@ -89,6 +89,25 @@ screenshot at 1920 and 393 and compare against `reference/`.
 .venv/bin/python crop.py reference/home.png X Y W H out.png 3.0 # zoom
 ```
 
+### Reading images without burning the budget
+
+Visual comparison is the single largest token cost in this repo, and it is
+mostly avoidable. The full-page renders are huge — `reference/home.png` is
+2.3 MB, `screenshots/index-1920.png` is 4.2 MB — and reading one costs more
+than the entire template you are writing.
+
+- **Read crops, not full pages.** `reference/crops/` already holds pre-sliced
+  strips of every render. To check a nav bar or a button, read the strip or
+  `crop.py` the region — tens of KB instead of megabytes.
+- **Read a full render once** for overall layout, then work from crops.
+- **Screenshot the region you changed**, not the whole page, and do not
+  re-screenshot after every edit. Batch your changes, then verify once.
+- **Do not read your own screenshot back** unless you are actually comparing
+  it; capturing it to disk is enough if you only needed it saved.
+
+A worker that reads six full-page PNGs has spent more than a worker that read
+sixty crops.
+
 ## Content architecture
 
 Which parts are editable in `wp-admin` versus fixed in a template. Follow this —
