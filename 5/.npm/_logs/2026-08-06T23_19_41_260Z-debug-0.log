@@ -1,0 +1,18 @@
+0 verbose cli /Users/mauro/.nvm/versions/node/v24.15.0/bin/node /Users/mauro/.nvm/versions/node/v24.15.0/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.12.1
+2 info using node@v24.15.0
+3 silly config load:file:/Users/mauro/.nvm/versions/node/v24.15.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/mauro/Dev/vivera-site/.npmrc
+5 silly config load:file:/Users/mauro/Dev/vivera-site/5/.npmrc
+6 silly config load:file:/Users/mauro/.nvm/versions/node/v24.15.0/etc/npmrc
+7 verbose title npm exec wp-env run cli wp rewrite flush --hard
+8 verbose argv "exec" "--" "wp-env" "run" "cli" "wp" "rewrite" "flush" "--hard"
+9 verbose logfile logs-max:10 dir:/Users/mauro/Dev/vivera-site/5/.npm/_logs/2026-08-06T23_19_41_260Z-
+10 verbose logfile /Users/mauro/Dev/vivera-site/5/.npm/_logs/2026-08-06T23_19_41_260Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose cwd /Users/mauro/Dev/vivera-site
+13 verbose os Darwin 25.5.0
+14 verbose node v24.15.0
+15 verbose npm  v11.12.1
+16 verbose exit 1
+17 verbose code 1

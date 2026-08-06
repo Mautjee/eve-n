@@ -67,9 +67,23 @@ sprawl.** Keep it that way.
 ```
 npm install
 npx wp-env start          # WordPress + MySQL on Docker, PHP 8.2
-npx wp-env run cli wp ...  # wp-cli
 npx wp-env stop
 ```
+
+**Use `docker exec` for wp-cli, not `npx wp-env run cli`.** The wrapper
+silently swallows writes — `wp option update page_on_front 5` reports success
+and changes nothing, and `--porcelain` output comes back polluted with wrapper
+text, so `$(...)` captures garbage. Go straight to the container:
+
+```
+C=$(docker ps --format '{{.Names}}' | grep -- '-cli-1' | head -1)
+docker exec "$C" wp option update page_on_front 5
+docker exec "$C" wp rewrite flush --hard
+```
+
+Also: `wp rewrite structure` does not persist here either — set
+`permalink_structure` with `wp option update` and then flush, or every pretty
+URL 404s.
 
 Site: `http://localhost:8888`. Admin: `http://localhost:8888/wp-admin`
 (`admin` / `password`). The theme is mounted from `wp-content/themes/eve-n`,
