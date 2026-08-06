@@ -1,7 +1,7 @@
 ---
 id: task-006
 title: "Blog: index grid and single post"
-status: todo
+status: in-progress
 priority: high
 labels: [theme, template, blog]
 created: 2026-08-07
