@@ -1139,3 +1139,58 @@ h2 {
   color: var(--gray);
   text-align: center;
 }
+
+/* ================================================================
+   Teal panels — centred button on phones
+   catalog-home.md section 3 and 5: "Mobile: full-width teal
+   background, photo removed, text spans full width, button centred".
+   Desktop keeps the flex-start alignment.
+   ================================================================ */
+
+@media (max-width: 768px) {
+  .section-teal__content .btn {
+    align-self: center;
+  }
+}
+
+/* ================================================================
+   Home — Projecten cards collapse on phones
+   phone-home.png draws the two cards as closed accordion rows: the
+   title centred, a gold "+" on the right, the body hidden until it
+   is tapped. main.js already toggles `.card.open`; these rules are
+   what that class acts on.
+   ================================================================ */
+
+@media (max-width: 768px) {
+  .card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 16px 20px;
+  }
+  /* Row one is the title and the toggle; the body wraps underneath it. */
+  .card__title {
+    order: 1;
+    flex: 1;
+    margin-bottom: 0;
+    text-align: center;
+  }
+  .card__icon--plus {
+    order: 2;
+    flex: 0 0 auto;
+    align-self: center;
+    margin-top: 0;
+    padding: 0 4px;
+    line-height: 1;
+    color: var(--gold);
+  }
+  .card__body {
+    order: 3;
+    flex: 0 0 100%;
+    display: none;
+    margin-top: 12px;
+  }
+  .card.open .card__body {
+    display: block;
+  }
+}

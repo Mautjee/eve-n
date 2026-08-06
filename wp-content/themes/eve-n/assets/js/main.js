@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isOpen) {
           card.classList.add('open');
         }
+        document.querySelectorAll('.card__icon--plus').forEach((other) => {
+          const parent = other.closest('.card');
+          other.setAttribute('aria-expanded', String(!!parent && parent.classList.contains('open')));
+        });
       }
     });
   });
