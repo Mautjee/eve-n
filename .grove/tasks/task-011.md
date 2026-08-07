@@ -5,7 +5,7 @@ status: review
 priority: low
 labels: [blog, editor-ux]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/9"
 ---
 
 ## Description
