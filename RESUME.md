@@ -9,30 +9,43 @@ decisions and their reasoning, the conventions, and the wp-cli gotchas.
 
 ## Where things stood
 
-**Tasks 001-007 and 010 are done, merged, and live on
-https://staging2.eve-n.nl.** All eight PRs reviewed and merged.
+**Tasks 001-007 and 009-011 are merged and live on
+https://staging2.eve-n.nl.** Ten PRs reviewed and merged.
 
-Every page verified on staging — HTTP 200, zero PHP errors, no `debug.log`:
-`/`, `/onze-werkwijze/`, `/projecten/`, `/over-ons/`, `/blog/`, `/contact/`,
-and the example post. Components confirmed rendering: 5 accordion items, 2 team
-cards, 4 contact fields, the blog card grid, the real WP nav menu,
-`lang="nl-NL"`, and zero Elementor stylesheets.
+Every page verified on staging — HTTP 200, zero PHP errors, zero Google Fonts,
+zero Elementor assets: `/`, `/onze-werkwijze/`, `/projecten/`, `/over-ons/`,
+`/blog/`, `/contact/`, and the example post. Components confirmed: 5 accordion
+items, 2 team cards, 4 contact fields, blog card grid, real WP nav menu,
+`lang="nl-NL"`, sitemap and robots.txt.
 
-`bin/seed.sh` populates a site from empty and is idempotent; `bin/deploy.sh`
+`bin/seed.sh` populates a site from empty and is idempotent. `bin/deploy.sh`
 ships the theme and purges cache. Both verified against staging.
 
-## What was in flight
+**Elementor and envato-elements were deactivated on staging.** They loaded
+Elementor's frontend bundle plus three Google Font families on the front page,
+because `page_on_front` is an old Elementor document. This undid task-009's
+font work. The same must be done on production — see task-012.
 
-Dispatched on `claude-sonnet-5`:
+## The one thing left
 
-| Task | |
-|---|---|
-| 008 | Images to the media pipeline (~16 MB -> under 1.5 MB) |
-| 009 | SEO + performance pass |
-| 011 | Move Ondertitel out of the collapsed Meta Boxes drawer |
+**task-008 — images to the media pipeline.** Not merged. It was still running
+at 135 turns when the usage limit hit 100%. It is the only thing standing
+between the site and a Lighthouse Performance pass: LCP is ~44s, entirely from
+`home-hero.webp` at 7.5 MB served eagerly. Everything else in the report is
+green (SEO 100, Best Practices 100, Accessibility 95, Performance 75).
 
-These are the last three. When they are merged and deployed, the build is
-feature-complete and only the operator's items below remain.
+Check `gv ls --json` first — the worker may have finished, died, or be
+mid-retry. If it has no PR and is not making progress:
+
+```
+gv untrack task-008 --rm
+gv grab task-008 --repo vivera-site --model claude-sonnet-5
+```
+
+Its worktree had found a real subtlety worth preserving: `add_image_size()`
+from `even_setup()` does not register when the theme is switched mid-request,
+so on a fresh install every imported image silently gets no generated sizes.
+The fix is calling `even_setup()` explicitly in the import script.
 
 ## How to continue
 
