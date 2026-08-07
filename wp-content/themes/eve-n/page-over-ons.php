@@ -42,15 +42,18 @@ while ( have_posts() ) :
 		<div class="team-grid">
 			<?php foreach ( even_team_members() as $even_member ) : ?>
 				<div class="team-card">
-					<img
-						class="team-card__img"
-						src="<?php echo esc_url( even_theme_image_url( $even_member['image'] ) ); ?>"
-						alt="<?php echo esc_attr( $even_member['alt'] ); ?>"
-						width="500"
-						height="500"
-						loading="lazy"
-						decoding="async"
-					>
+					<?php
+					even_seeded_image(
+						$even_member['image'],
+						'even-portrait',
+						array(
+							'class'    => 'team-card__img',
+							'alt'      => $even_member['alt'],
+							'loading'  => 'lazy',
+							'decoding' => 'async',
+						)
+					);
+					?>
 					<h3 class="team-card__name"><?php echo esc_html( $even_member['name'] ); ?></h3>
 					<?php foreach ( $even_member['bio'] as $even_paragraph ) : ?>
 						<p class="team-card__bio"><?php echo esc_html( $even_paragraph ); ?></p>

@@ -1,7 +1,8 @@
 <?php
 /**
- * Seed eve-n.nl: the six pages, the Hoofdmenu, site settings, and a starter
- * blog post, then remove the WordPress defaults.
+ * Seed eve-n.nl: the six pages, the Hoofdmenu, site settings, the XD export
+ * photos (side-loaded into the media library), and a starter blog post, then
+ * remove the WordPress defaults.
  *
  * Idempotent by construction: every step checks for what it would create
  * before creating it, so a second run finds everything already in place and
@@ -27,6 +28,12 @@ defined( 'WP_CLI' ) || exit( "This script must be run through wp-cli — see bin
 // Trusted, developer-authored HTML, not user input — skip kses so entities
 // and markup are stored exactly as written below.
 kses_remove_filters();
+
+// media_handle_sideload() and wp_generate_attachment_metadata() live here;
+// eval-file's bare WP-CLI bootstrap doesn't load the wp-admin includes.
+require_once ABSPATH . 'wp-admin/includes/image.php';
+require_once ABSPATH . 'wp-admin/includes/media.php';
+require_once ABSPATH . 'wp-admin/includes/file.php';
 
 /**
  * The site's first administrator, used as the author of everything this
@@ -146,6 +153,27 @@ function even_seed_activate_theme() {
 
 	switch_theme( 'eve-n' );
 	WP_CLI::log( "Activated theme 'eve-n'." );
+
+	// switch_theme() doesn't load eve-n's functions.php into this process —
+	// whichever theme was active when PHP booted already had its own
+	// functions.php required, and switching mid-request doesn't undo that or
+	// load the new one. Without this, add_image_size() never runs on a fresh
+	// install, and every image imported below this point silently gets no
+	// even-hero/even-card/even-portrait/even-contact size — see the images
+	// gotcha in AGENTS.md for why that matters.
+	$functions_file = get_theme_file_path( 'functions.php' );
+
+	if ( file_exists( $functions_file ) ) {
+		require_once $functions_file;
+	}
+
+	// Not even_setup() — that also calls add_theme_support(), which WordPress
+	// logs a "called incorrectly" notice for outside its normal
+	// after_setup_theme timing. Registering the image sizes is all this
+	// script needs.
+	if ( function_exists( 'even_register_image_sizes' ) ) {
+		even_register_image_sizes();
+	}
 }
 
 /**
@@ -312,6 +340,162 @@ HTML;
 
 	update_post_meta( $post_id, 'even_subtitle', 'Kennis delen over samenwerken in de infrastructuur' );
 	WP_CLI::log( "Created example post (#{$post_id})." );
+
+	return (int) $post_id;
+}
+
+/**
+ * Resize (if needed) and re-encode a source image as a properly lossy WebP,
+ * ready to side-load into the media library.
+ *
+ * Two problems, one fix. The XD exports are up to 4096px wide, and several
+ * — including the home hero — are *lossless* WebP: a photo encoded lossless
+ * comes out several times larger than a lossy encode at the same
+ * dimensions. Simply side-loading and letting WordPress generate sizes
+ * does not fix the second problem, because WP_Image_Editor_GD::
+ * set_quality() deliberately preserves losslessness on save (see
+ * https://php.watch/versions/8.1/gd-webp-lossless). Re-encoding through GD
+ * directly, bypassing that editor, sidesteps it.
+ *
+ * @param string $path    Absolute path to the source file.
+ * @param int    $max_dim Longest edge, in pixels. Nothing in this theme
+ *                         displays wider than 2560.
+ * @param int    $quality WebP quality, 1-100.
+ * @return string|false Path to a temporary re-encoded file, or false on failure.
+ */
+function even_seed_prepare_image( $path, $max_dim = 2560, $quality = 82 ) {
+	if ( ! function_exists( 'imagecreatefromwebp' ) || ! function_exists( 'imagewebp' ) ) {
+		return false;
+	}
+
+	$image = @imagecreatefromwebp( $path );
+
+	if ( ! $image ) {
+		return false;
+	}
+
+	$width  = imagesx( $image );
+	$height = imagesy( $image );
+
+	if ( $width > $max_dim || $height > $max_dim ) {
+		$scale      = min( $max_dim / $width, $max_dim / $height );
+		$new_width  = max( 1, (int) round( $width * $scale ) );
+		$new_height = max( 1, (int) round( $height * $scale ) );
+		$resized    = imagescale( $image, $new_width, $new_height, IMG_BICUBIC );
+		imagedestroy( $image );
+
+		if ( ! $resized ) {
+			return false;
+		}
+
+		$image = $resized;
+	}
+
+	$tmp = wp_tempnam( wp_basename( $path ) );
+	$ok  = imagewebp( $image, $tmp, $quality );
+	imagedestroy( $image );
+
+	return $ok ? $tmp : false;
+}
+
+/**
+ * Side-load one seed image into the media library, if it isn't there yet.
+ *
+ * Idempotent via the `_even_seed_key` attachment meta: a second run finds
+ * the existing attachment by key and returns its ID rather than importing
+ * again. Records the ID in the `even_image_<key>` option so templates can
+ * resolve it — see even_seeded_image_id() / even_seeded_image() in
+ * inc/media.php.
+ *
+ * @param string $key   Stable key, e.g. 'home-hero'.
+ * @param string $file  File name inside the active theme's assets/img/seed/.
+ * @param string $title Media library title.
+ * @param string $alt   Alt text, stored on the attachment.
+ * @return int Attachment ID, or 0 if the source file is missing or import failed.
+ */
+function even_seed_image( $key, $file, $title, $alt ) {
+	$existing = get_posts(
+		array(
+			'post_type'   => 'attachment',
+			'post_status' => 'any',
+			'numberposts' => 1,
+			'meta_key'    => '_even_seed_key',
+			'meta_value'  => $key,
+		)
+	);
+
+	if ( $existing ) {
+		$attachment_id = (int) $existing[0]->ID;
+		WP_CLI::log( "Image '{$key}' already imported (#{$attachment_id})." );
+		update_option( 'even_image_' . $key, $attachment_id );
+		return $attachment_id;
+	}
+
+	$source = get_theme_file_path( 'assets/img/seed/' . $file );
+
+	if ( ! file_exists( $source ) ) {
+		WP_CLI::warning( "Seed image '{$file}' not found for '{$key}' — skipping." );
+		return 0;
+	}
+
+	$prepared = even_seed_prepare_image( $source );
+
+	if ( ! $prepared ) {
+		WP_CLI::warning( "Could not process '{$file}' for '{$key}' — skipping." );
+		return 0;
+	}
+
+	$attachment_id = media_handle_sideload(
+		array(
+			'name'     => $file,
+			'tmp_name' => $prepared,
+		),
+		0,
+		$title
+	);
+
+	if ( is_wp_error( $attachment_id ) ) {
+		if ( file_exists( $prepared ) ) {
+			wp_delete_file( $prepared );
+		}
+		WP_CLI::warning( "Failed to import '{$file}' for '{$key}': " . $attachment_id->get_error_message() );
+		return 0;
+	}
+
+	wp_update_post(
+		array(
+			'ID'         => $attachment_id,
+			'post_title' => $title,
+		)
+	);
+	update_post_meta( $attachment_id, '_wp_attachment_image_alt', $alt );
+	update_post_meta( $attachment_id, '_even_seed_key', $key );
+	update_option( 'even_image_' . $key, $attachment_id );
+
+	WP_CLI::log( "Imported image '{$key}' from '{$file}' (#{$attachment_id})." );
+
+	return (int) $attachment_id;
+}
+
+/**
+ * Set a post's featured image, if it doesn't already have one — never
+ * overwrites a photo an editor picked in wp-admin.
+ *
+ * @param int $post_id       Page or post ID.
+ * @param int $attachment_id Attachment ID.
+ */
+function even_seed_featured_image( $post_id, $attachment_id ) {
+	if ( ! $post_id || ! $attachment_id ) {
+		return;
+	}
+
+	if ( has_post_thumbnail( $post_id ) ) {
+		WP_CLI::log( "Post #{$post_id} already has a featured image." );
+		return;
+	}
+
+	set_post_thumbnail( $post_id, $attachment_id );
+	WP_CLI::log( "Set featured image for post #{$post_id} to attachment #{$attachment_id}." );
 }
 
 // ========== THEME ==========
@@ -354,6 +538,70 @@ $even_projecten_id      = even_seed_page( 'projecten', 'Projecten', $even_projec
 $even_over_ons_id       = even_seed_page( 'over-ons', 'Over ons', $even_over_ons_content );
 $even_blog_id           = even_seed_page( 'blog', 'Blog', $even_blog_content );
 $even_contact_id        = even_seed_page( 'contact', 'Contact', '' );
+
+// ========== IMAGES ==========
+// Side-loaded from the XD exports (assets/res-*.webp) via their theme copies
+// under assets/img/seed/ — see AGENTS.md's images gotcha: the raw exports
+// are unoptimised, up to 7MB each, ~16MB total.
+
+$even_image_manifest = array(
+	'home-hero'        => array(
+		'file'  => 'home-hero.webp',
+		'title' => 'Bouwteam op de bouwplaats',
+		'alt'   => __( 'Bouwteam in overleg op de bouwplaats, gezien van boven', 'eve-n' ),
+	),
+	'home-werkwijze'   => array(
+		'file'  => 'home-werkwijze.webp',
+		'title' => 'Pijl omhoog getekend met krijt',
+		'alt'   => __( 'Hand die met krijt een pijl naar boven tekent, symbool voor groei en vooruitgang', 'eve-n' ),
+	),
+	'home-blog'        => array(
+		'file'  => 'home-blog.webp',
+		'title' => 'Documenten met gekleurde tabbladen',
+		'alt'   => __( 'Vrouw die documenten met gekleurde tabbladen ordent aan haar bureau', 'eve-n' ),
+	),
+	'home-contact-cta' => array(
+		'file'  => 'home-contact-cta.webp',
+		'title' => 'Skyline van Rotterdam',
+		'alt'   => __( 'Skyline van Rotterdam met de Erasmusbrug in de avondschemering', 'eve-n' ),
+	),
+	'portrait-eveline' => array(
+		'file'  => 'portrait-eveline.webp',
+		'title' => 'Eveline Hinfelaar',
+		'alt'   => __( 'Portret van Eveline Hinfelaar, oprichter van Eve-n', 'eve-n' ),
+	),
+	'portrait-thomas'  => array(
+		'file'  => 'portrait-thomas.webp',
+		'title' => 'Thomas Vilain',
+		'alt'   => __( 'Portret van Thomas Vilain, teamlid bij Eve-n', 'eve-n' ),
+	),
+	'blog-placeholder' => array(
+		'file'  => 'blog-placeholder.webp',
+		'title' => 'Bouwteam bekijkt bouwtekeningen',
+		'alt'   => __( 'Bouwteam bekijkt bouwtekeningen op de bouwplaats, gezien van boven', 'eve-n' ),
+	),
+	'werkwijze-hero'   => array(
+		'file'  => 'werkwijze-hero.webp',
+		'title' => 'Team werkt samen tijdens een brainstormsessie',
+		'alt'   => __( 'Team dat samen ideeën uitwerkt met plaknotities tijdens een brainstormsessie', 'eve-n' ),
+	),
+);
+
+$even_image_ids = array();
+
+foreach ( $even_image_manifest as $even_image_key => $even_image ) {
+	$even_image_ids[ $even_image_key ] = even_seed_image( $even_image_key, $even_image['file'], $even_image['title'], $even_image['alt'] );
+}
+
+// Over Ons and Onze Werkwijze each get their own hero photo. Over Ons
+// matches the XD design (over-ons.html's own hero was res-2104ab6e, the same
+// photo as the home page's "Onze Werkwijze" section). Onze Werkwijze didn't
+// have a distinct hero in the ported static site — every subpage shared the
+// generic one — so it gets the otherwise-unused werkwijze-hero export
+// instead of sharing that fallback. Every other page without a featured
+// image still falls back to it; see even_hero_image() in inc/hero.php.
+even_seed_featured_image( $even_over_ons_id, $even_image_ids['home-werkwijze'] );
+even_seed_featured_image( $even_onze_werkwijze_id, $even_image_ids['werkwijze-hero'] );
 
 // ========== SITE SETTINGS ==========
 
@@ -412,6 +660,7 @@ even_seed_menu(
 
 // ========== EXAMPLE BLOG POST ==========
 
-even_seed_example_post();
+$even_example_post_id = even_seed_example_post();
+even_seed_featured_image( $even_example_post_id, $even_image_ids['blog-placeholder'] );
 
 WP_CLI::success( 'eve-n.nl seeded.' );

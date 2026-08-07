@@ -138,25 +138,32 @@ $even_values = wp_parse_args(
 						'name'  => 'Thomas Vilain',
 						'email' => 'T.vilain@eve-n.nl',
 						'phone' => '+31 6 81 44 02 25',
-						'image' => 'contact-thomas.webp',
+						'image' => 'portrait-thomas',
+						'alt'   => __( 'Portret van Thomas Vilain', 'eve-n' ),
 					),
 					array(
 						'name'  => 'Eveline Hinfelaar',
 						'email' => 'E.hinfelaar@eve-n.nl',
 						'phone' => '+31 6 24 65 68 33',
-						'image' => 'contact-eveline.webp',
+						'image' => 'portrait-eveline',
+						'alt'   => __( 'Portret van Eveline Hinfelaar', 'eve-n' ),
 					),
 				);
 
 				foreach ( $even_contact_people as $even_person ) :
 					?>
 					<div class="contact-person">
-						<img
-							class="contact-person__img"
-							src="<?php echo esc_url( even_theme_image_url( $even_person['image'] ) ); ?>"
-							alt="<?php echo esc_attr( $even_person['name'] ); ?>"
-							width="120" height="150" loading="lazy"
-						>
+						<?php
+						even_seeded_image(
+							$even_person['image'],
+							'even-contact',
+							array(
+								'class'   => 'contact-person__img',
+								'alt'     => $even_person['alt'],
+								'loading' => 'lazy',
+							)
+						);
+						?>
 						<div>
 							<p class="contact-person__name"><?php echo esc_html( $even_person['name'] ); ?></p>
 							<p class="contact-person__detail"><a href="mailto:<?php echo esc_attr( $even_person['email'] ); ?>"><?php echo esc_html( $even_person['email'] ); ?></a></p>

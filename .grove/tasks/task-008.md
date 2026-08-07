@@ -1,11 +1,11 @@
 ---
 id: task-008
 title: "Move images to the WordPress media pipeline"
-status: todo
+status: review
 priority: high
 labels: [performance, images]
 created: 2026-08-07
-pr: ""
+pr: "https://github.com/Mautjee/eve-n/pull/11"
 ---
 
 ## Description
@@ -32,10 +32,10 @@ wider than 2560px.
 
 ## Acceptance Criteria
 
-- [ ] No template references `assets/res-*.webp` directly
-- [ ] Home page total transfer under **1.5 MB** on a cold load at 1920px
+- [x] No template references `assets/res-*.webp` directly
+- [x] Home page total transfer under **1.5 MB** on a cold load at 1920px
       (from ~16 MB), measured and stated in the PR
-- [ ] Mobile at 393px loads appropriately sized images, not desktop originals
-- [ ] Images below the fold are lazy-loaded; the hero is **not** (it is LCP)
-- [ ] Every image has meaningful `alt` text
-- [ ] Import is idempotent and does not duplicate attachments
+- [x] Mobile at 393px loads appropriately sized images, not desktop originals
+- [x] Images below the fold are lazy-loaded; the hero is **not** (it is LCP)
+- [x] Every image has meaningful `alt` text
+- [x] Import is idempotent and does not duplicate attachments

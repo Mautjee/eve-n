@@ -1875,3 +1875,39 @@ h2 {
   font-size: var(--fs-body-sm);
   text-align: left;
 }
+
+/* ================================================================
+   Home page photos as <img> (task-008)
+
+   The home hero, the two section-teal photos and the contact CTA
+   background were CSS `background-image` on raw XD exports — no srcset,
+   no lazy-loading. They are now real <img> elements from the media
+   library; `object-fit: cover` reproduces the old `background-size:
+   cover` framing regardless of the source photo's own aspect ratio.
+   ================================================================ */
+.hero--home::before {
+  z-index: 1; /* above .hero__img (0), below .hero-content (2) */
+}
+.section-teal__photo {
+  position: relative;
+  overflow: hidden;
+}
+.section-teal__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cta-photo > .cta-photo__img {
+  /* Two classes on the child combinator outweighs `.cta-photo > *` above,
+     regardless of source order, so this always wins. */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cta-photo::before {
+  z-index: 1;
+}
