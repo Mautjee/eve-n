@@ -35,17 +35,39 @@ between the site and a Lighthouse Performance pass: LCP is ~44s, entirely from
 green (SEO 100, Best Practices 100, Accessibility 95, Performance 75).
 
 Check `gv ls --json` first — the worker may have finished, died, or be
-mid-retry. If it has no PR and is not making progress:
+mid-retry.
+
+**Do not run `gv untrack task-008 --rm` before checking the worktree.** As of
+02:30 it held ~36 minutes of *uncommitted* work, and `--rm` deletes the
+worktree. Look first:
 
 ```
-gv untrack task-008 --rm
-gv grab task-008 --repo vivera-site --model claude-sonnet-5
+W=/Users/mauro/Dev/.worktrees/vivera-site/task-008-move-images-to-the-wordpress
+git -C "$W" status --short
+git -C "$W" log --oneline main..HEAD
 ```
 
-Its worktree had found a real subtlety worth preserving: `add_image_size()`
-from `even_setup()` does not register when the theme is switched mid-request,
-so on a fresh install every imported image silently gets no generated sizes.
-The fix is calling `even_setup()` explicitly in the import script.
+If there are uncommitted changes worth keeping, salvage them before doing
+anything destructive:
+
+```
+git -C "$W" add -A && git -C "$W" commit -m "task-008: WIP salvaged"
+git -C "$W" push -u origin task-008-move-images-to-the-wordpress
+```
+
+Only re-grab from scratch once you are sure nothing is worth keeping.
+
+Two things that worktree had already worked out, worth not rediscovering:
+
+- `add_image_size()` from `even_setup()` does not register when the theme is
+  switched mid-request, so on a fresh install every imported image silently
+  gets no generated sizes. Fix: call `even_setup()` explicitly in the importer.
+- It moved the bundled fallback images to `assets/img/seed/`, separating
+  "shipped with the theme so a fresh install is not broken" from "belongs in
+  the media library". That split is worth keeping.
+
+Note this task cost **$12.15 over 173 turns on Sonnet** — more than any Opus
+task in this project. Image work is genuinely fiddly; budget for it.
 
 ## How to continue
 
