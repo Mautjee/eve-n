@@ -26,16 +26,3 @@ function even_page_url( $slug ) {
 
 	return $page ? get_permalink( $page ) : home_url( '/' . $slug . '/' );
 }
-
-/**
- * URL of a still-static image bundled with the theme.
- *
- * A single seam for task-008, which replaces these with attachments from the
- * media library so they get srcset and generated sizes.
- *
- * @param string $file File name inside assets/img/.
- * @return string
- */
-function even_theme_image_url( $file ) {
-	return get_theme_file_uri( 'assets/img/' . $file );
-}

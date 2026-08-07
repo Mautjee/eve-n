@@ -257,10 +257,16 @@ free-form content.
 
 - **`reviews.html` is the Projecten page.** It becomes the `/projecten` route;
   the old filename is misleading.
-- **Images are unoptimised XD exports.** `res-b5ce20a2.webp` (home hero) is
-  **7.1 MB**; the set totals ~16 MB. They must go through the WordPress media
-  pipeline for `srcset` before launch. Do not ship them as raw CSS
-  `background-image` URLs.
+- **The XD exports (`assets/res-*.webp`, ~16 MB) are unoptimised — task-008
+  fixed this.** `bin/seed.php` side-loads theme copies of them
+  (`wp-content/themes/eve-n/assets/img/seed/`) into the media library,
+  resizing to 2560px max and re-encoding as lossy WebP on the way in (the
+  home hero was a 7.1 MB *lossless* WebP — GD's image editor deliberately
+  preserves losslessness on save, so simply sideloading it would not have
+  fixed the size). Templates resolve the results by key through
+  `even_seeded_image()` in `inc/media.php`, never a raw file path. Don't
+  reintroduce a template that references `assets/res-*.webp` or a CSS
+  `background-image` on one of these photos directly.
 - **`index.html` still has lorem ipsum** in the Projecten cards, as does the
   blog placeholder content. Real copy is pending from the client.
 - **WordPress injects block-library CSS** on every page. This is a classic

@@ -18,13 +18,13 @@ defined( 'ABSPATH' ) || exit;
  * Bios are verbatim from reference/catalog-over-ons.md, one array entry per
  * paragraph so the template can print them as separate <p> tags.
  *
- * @return array[] Each entry: name, image (file in assets/img/), alt, bio (paragraphs).
+ * @return array[] Each entry: name, image (seeded-image key, see bin/seed.php), alt, bio (paragraphs).
  */
 function even_team_members() {
 	return array(
 		array(
 			'name'  => 'Eveline Hinfelaar',
-			'image' => 'team-eveline-hinfelaar.webp',
+			'image' => 'portrait-eveline',
 			'alt'   => __( 'Portret van Eveline Hinfelaar, oprichter van Eve-n', 'eve-n' ),
 			'bio'   => array(
 				'Mijn naam is Eveline Hinfelaar. Al jarenlang ben ik gespecialiseerd in samenwerking binnen de infrastructuur. Als coach en adviseur geniet ik ervan om samen met organisaties en de teams daarbinnen aan de slag te gaan in het vormen van een effectief, verbonden en professioneel samenwerkend geheel.',
@@ -34,7 +34,7 @@ function even_team_members() {
 		),
 		array(
 			'name'  => 'Thomas Vilain',
-			'image' => 'team-thomas-vilain.webp',
+			'image' => 'portrait-thomas',
 			'alt'   => __( 'Portret van Thomas Vilain, teamlid bij Eve-n', 'eve-n' ),
 			'bio'   => array(
 				'Mijn naam is Thomas Vilain. Ik werk inmiddels drie jaar bij Eve-n en volg daarnaast een masteropleiding Culture, Organization and Management aan de Vrije Universiteit Amsterdam. Naast het mooie werk dat ik bij Eve-n mag doen, houd ik me graag bezig met sporten(voornamelijk boksen) en reizen. Wat ik zo leuk vind aan mijn werk is de afwisseling: geen dag is hetzelfde en ik leer continu nieuwe dingen.',

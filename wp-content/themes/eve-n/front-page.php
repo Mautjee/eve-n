@@ -10,8 +10,8 @@
  * express without a page builder. See the content architecture table in
  * AGENTS.md. Every other page draws its text from the editor.
  *
- * The section photos are still theme files referenced as CSS backgrounds;
- * task-008 moves them into the media library.
+ * The section photos are side-loaded into the media library by
+ * bin/seed.php (task-008) and resolved here by key — see inc/media.php.
  *
  * @package eve-n
  */
@@ -24,10 +24,26 @@ get_header();
 <main>
 
 	<!-- ========== HERO (home variant) ========== -->
-	<section class="hero hero--home" style="background-image: url( '<?php echo esc_url( even_theme_image_url( 'home-hero.webp' ) ); ?>' );">
+	<section class="hero hero--home">
+		<?php
+		// An <img> rather than a CSS background, so the hero gets srcset. It
+		// is the LCP element on this page, so it is neither lazy nor low
+		// priority.
+		even_seeded_image(
+			'home-hero',
+			'even-hero',
+			array(
+				'class'         => 'hero__img',
+				'sizes'         => '100vw',
+				'loading'       => 'eager',
+				'fetchpriority' => 'high',
+				'decoding'      => 'sync',
+			)
+		);
+		?>
 		<div class="hero-content">
 			<div class="hero-logo">
-				<img src="<?php echo esc_url( even_theme_image_url( 'logo.webp' ) ); ?>" alt="<?php esc_attr_e( 'EVE-N logo', 'eve-n' ); ?>" width="60" height="60">
+				<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo.webp' ) ); ?>" alt="<?php esc_attr_e( 'EVE-N logo', 'eve-n' ); ?>" width="60" height="60">
 				<h1 class="logo-text">EVE-N</h1>
 			</div>
 			<p class="hero-subtitle">Bouwen aan succes; teamontwikkeling en samenwerking binnen infrastructuurprojecten</p>
@@ -37,7 +53,19 @@ get_header();
 
 	<!-- ========== ONZE WERKWIJZE (teal panel + photo) ========== -->
 	<section class="section-teal" id="werkwijze">
-		<div class="section-teal__photo" style="background-image: url( '<?php echo esc_url( even_theme_image_url( 'home-werkwijze.webp' ) ); ?>' );"></div>
+		<div class="section-teal__photo">
+			<?php
+			even_seeded_image(
+				'home-werkwijze',
+				'even-hero',
+				array(
+					'class'    => 'section-teal__photo-img',
+					'loading'  => 'lazy',
+					'decoding' => 'async',
+				)
+			);
+			?>
+		</div>
 		<div class="section-teal__content">
 			<h2>Onze Werkwijze</h2>
 			<p>De infrastructuur kent grote uitdagingen! Samenwerken binnen deze complexe opgaves is cruciaal om effectief en succesvol te zijn. En dat moet je samen goed organiseren! Succesvolle samenwerking vraagt om m&eacute;&eacute;r dan structuur alleen. Het draait ook om het ontwikkelen van samenwerkingsvaardigheden, het versterken van onderling vertrouwen en het bouwen aan een (h)echt team. Eve-n begeleidt dit proces met oog voor de mens &eacute;n het project. Samen maken we van samenwerking een kracht &ndash; voor projecten die niet alleen effici&euml;nt, maar ook met plezier worden gerealiseerd.</p>
@@ -57,7 +85,19 @@ get_header();
 
 	<!-- ========== BLOG (teal panel + photo, reversed) ========== -->
 	<section class="section-teal" id="blog" style="flex-direction: row-reverse;">
-		<div class="section-teal__photo" style="background-image: url( '<?php echo esc_url( even_theme_image_url( 'home-blog.webp' ) ); ?>' );"></div>
+		<div class="section-teal__photo">
+			<?php
+			even_seeded_image(
+				'home-blog',
+				'even-hero',
+				array(
+					'class'    => 'section-teal__photo-img',
+					'loading'  => 'lazy',
+					'decoding' => 'async',
+				)
+			);
+			?>
+		</div>
 		<div class="section-teal__content">
 			<h2>Blog</h2>
 			<p>We geloven sterk in het delen van kennis &ndash; want goede samenwerking begint met begrijpen wat werkt.</p>
@@ -104,7 +144,19 @@ get_header();
 	</section>
 
 	<!-- ========== CONTACT CTA (photo bg) ========== -->
-	<section class="cta-photo" style="background-image: url( '<?php echo esc_url( even_theme_image_url( 'home-contact-cta.webp' ) ); ?>' );">
+	<section class="cta-photo">
+		<?php
+		even_seeded_image(
+			'home-contact-cta',
+			'even-hero',
+			array(
+				'class'    => 'cta-photo__img',
+				'sizes'    => '100vw',
+				'loading'  => 'lazy',
+				'decoding' => 'async',
+			)
+		);
+		?>
 		<p>Benieuwd wat wij voor jouw team kunnen betekenen?</p>
 		<p>Neem gerust contact met ons op &ndash; we denken graag met je mee!</p>
 		<a href="<?php echo esc_url( even_page_url( 'contact' ) ); ?>" class="btn btn--fill"><?php esc_html_e( 'Contact', 'eve-n' ); ?></a>

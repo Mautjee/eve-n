@@ -21,34 +21,22 @@ defined( 'ABSPATH' ) || exit;
  * largest contentful paint on every subpage.
  */
 function even_hero_image() {
-	if ( has_post_thumbnail() ) {
-		echo wp_get_attachment_image(
-			get_post_thumbnail_id(),
-			'full',
-			false,
-			array(
-				'class'         => 'hero__photo',
-				'sizes'         => '100vw',
-				'loading'       => 'eager',
-				'fetchpriority' => 'high',
-				'decoding'      => 'sync',
-			)
-		);
-		return;
-	}
-
-	// Cropped from the XD export `assets/res-b5ce20a2.webp`.
-	$fallback = 'assets/img/hero-page.webp';
-
-	if ( ! file_exists( get_theme_file_path( $fallback ) ) ) {
-		return;
-	}
-
-	printf(
-		'<img class="hero__photo" src="%1$s" width="1920" height="600" alt="%2$s" fetchpriority="high" decoding="sync">',
-		esc_url( get_theme_file_uri( $fallback ) ),
-		esc_attr__( 'Bouwteam in gesprek rond een tekening op een bouwlocatie, gezien van boven', 'eve-n' )
+	$attrs = array(
+		'class'         => 'hero__photo',
+		'sizes'         => '100vw',
+		'loading'       => 'eager',
+		'fetchpriority' => 'high',
+		'decoding'      => 'sync',
 	);
+
+	if ( has_post_thumbnail() ) {
+		echo wp_get_attachment_image( get_post_thumbnail_id(), 'even-hero', false, $attrs ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		return;
+	}
+
+	// Same photo as the home hero (assets/res-b5ce20a2.webp), side-loaded by
+	// bin/seed.php — every page without its own featured image shares it.
+	even_seeded_image( 'home-hero', 'even-hero', $attrs );
 }
 
 /**

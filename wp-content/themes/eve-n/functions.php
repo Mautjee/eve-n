@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 define( 'EVEN_VERSION', '0.1.0' );
 
 require_once get_theme_file_path( 'inc/links.php' );
+require_once get_theme_file_path( 'inc/media.php' );
 require_once get_theme_file_path( 'inc/hero.php' );
 
 /** Blog: the "Ondertitel" post meta field and the blog index query. */
@@ -43,11 +44,37 @@ function even_setup() {
 		)
 	);
 
-	// Blog card thumbnails and full-bleed hero images, sized from the XD design.
-	add_image_size( 'even-card', 800, 520, true );
-	add_image_size( 'even-hero', 1920, 600, true );
+	even_register_image_sizes();
 }
 add_action( 'after_setup_theme', 'even_setup' );
+
+/**
+ * Register the theme's custom image sizes.
+ *
+ * Split out from even_setup() so bin/seed.php can call it on its own: on a
+ * fresh install, switch_theme() activates eve-n but doesn't load its
+ * functions.php into the running process, so even_setup()'s add_image_size()
+ * calls never register before the seed script side-loads images. Calling
+ * just this — not even_setup() itself — avoids re-running add_theme_support()
+ * outside its normal `after_setup_theme` timing, which WordPress logs a
+ * "called incorrectly" notice for.
+ */
+function even_register_image_sizes() {
+	// Blog cards and full-bleed heroes: proportional (not hard-cropped), so
+	// every generated size shares the original's aspect ratio and WordPress
+	// includes them all in srcset. The visual crop to fit the layout comes
+	// from `object-fit: cover` in CSS instead — a hard-cropped size gets no
+	// sibling of the same ratio, so `wp_get_attachment_image_srcset()` has
+	// nothing to offer and mobile ends up downloading the same image as
+	// desktop.
+	add_image_size( 'even-card', 800, 800 );
+	add_image_size( 'even-hero', 1920, 1920 );
+
+	// Portraits: hard-cropped, since these are always the same square/card
+	// shape regardless of viewport — team cards and the contact page.
+	add_image_size( 'even-portrait', 500, 500, true );
+	add_image_size( 'even-contact', 240, 300, true );
+}
 
 /**
  * Front-end assets.
