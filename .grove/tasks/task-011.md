@@ -1,7 +1,7 @@
 ---
 id: task-011
 title: "Ondertitel: move out of the collapsed Meta Boxes drawer"
-status: todo
+status: in-progress
 priority: low
 labels: [blog, editor-ux]
 created: 2026-08-07

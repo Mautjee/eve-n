@@ -92,83 +92,32 @@ function even_get_subtitle( $post = null ) {
 }
 
 /**
- * The "Ondertitel" box in the post editor.
+ * The "Ondertitel" panel in the block editor sidebar.
+ *
+ * A native `PluginDocumentSettingPanel`, not a classic meta box — that box
+ * used to land in the collapsed "Meta Boxes" drawer at the bottom of the
+ * editor, where the client had to know to expand it to find the field.
+ * The panel reads and writes through the `register_post_meta()` REST field
+ * above, so no separate save handler is needed here.
  */
-function even_add_subtitle_meta_box() {
-	add_meta_box(
-		'even-subtitle',
-		__( 'Ondertitel', 'eve-n' ),
-		'even_render_subtitle_meta_box',
-		'post',
-		'normal',
-		'high'
+function even_enqueue_subtitle_panel() {
+	$screen = get_current_screen();
+
+	if ( ! $screen || 'post' !== $screen->post_type ) {
+		return;
+	}
+
+	$js = get_theme_file_path( 'assets/js/subtitle-panel.js' );
+
+	wp_enqueue_script(
+		'even-subtitle-panel',
+		get_theme_file_uri( 'assets/js/subtitle-panel.js' ),
+		array( 'wp-plugins', 'wp-edit-post', 'wp-element', 'wp-components', 'wp-data', 'wp-i18n' ),
+		file_exists( $js ) ? filemtime( $js ) : EVEN_VERSION,
+		true
 	);
 }
-add_action( 'add_meta_boxes_post', 'even_add_subtitle_meta_box' );
-
-/**
- * Meta box markup.
- *
- * @param WP_Post $post Post being edited.
- */
-function even_render_subtitle_meta_box( $post ) {
-	wp_nonce_field( 'even_save_subtitle', 'even_subtitle_nonce' );
-	?>
-	<p>
-		<label for="even-subtitle-field">
-			<?php esc_html_e( 'Korte ondertitel, onder de titel op de blogkaart en in de header van het bericht.', 'eve-n' ); ?>
-		</label>
-	</p>
-	<input
-		type="text"
-		id="even-subtitle-field"
-		name="even_subtitle"
-		class="widefat"
-		maxlength="160"
-		value="<?php echo esc_attr( even_get_subtitle( $post ) ); ?>"
-	>
-	<?php
-}
-
-/**
- * Persist the subtitle from the editor form.
- *
- * Block-editor saves go through REST, where `register_post_meta()` above does the
- * sanitising and the auth check; those requests carry no nonce, so bail early
- * rather than wiping the value.
- *
- * @param int     $post_id Post ID.
- * @param WP_Post $post    Post object.
- */
-function even_save_subtitle( $post_id, $post ) {
-	if ( ! isset( $_POST['even_subtitle_nonce'] ) ) {
-		return;
-	}
-
-	if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['even_subtitle_nonce'] ) ), 'even_save_subtitle' ) ) {
-		return;
-	}
-
-	if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
-		return;
-	}
-
-	if ( ! current_user_can( 'edit_post', $post_id ) ) {
-		return;
-	}
-
-	$subtitle = isset( $_POST['even_subtitle'] )
-		? even_sanitize_subtitle( wp_unslash( $_POST['even_subtitle'] ) )
-		: '';
-
-	if ( '' === $subtitle ) {
-		delete_post_meta( $post_id, EVEN_SUBTITLE_META_KEY );
-		return;
-	}
-
-	update_post_meta( $post_id, EVEN_SUBTITLE_META_KEY, $subtitle );
-}
-add_action( 'save_post_post', 'even_save_subtitle', 10, 2 );
+add_action( 'enqueue_block_editor_assets', 'even_enqueue_subtitle_panel' );
 
 /**
  * Show four cards per page on the blog index, matching the design's grid.
