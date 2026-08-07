@@ -1935,3 +1935,16 @@ h2 {
     max-width: 130px;
   }
 }
+
+/* ================================================================
+   Hero mark — white via filter, not a dedicated white asset
+   hero-mark (Eve-nicoonkleur.png) ships teal/gold/black bars on a
+   transparent canvas. brightness(0) flattens every opaque pixel to
+   black without touching alpha, then invert(1) flips that to white,
+   so the transparent gaps between the bars stay transparent. Scoped
+   to the hero mark only — the header's nav-logo house is already a
+   white asset and must not go through this filter.
+   ================================================================ */
+.hero-logo__mark {
+  filter: brightness(0) invert(1);
+}
