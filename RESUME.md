@@ -9,65 +9,45 @@ decisions and their reasoning, the conventions, and the wp-cli gotchas.
 
 ## Where things stood
 
-**Tasks 001-007 and 009-011 are merged and live on
-https://staging2.eve-n.nl.** Ten PRs reviewed and merged.
+**All twelve build tasks are merged and live on https://staging2.eve-n.nl.**
+Eleven PRs reviewed and merged. The build is feature-complete.
 
-Every page verified on staging — HTTP 200, zero PHP errors, zero Google Fonts,
+Verified on staging — every page HTTP 200, zero PHP errors, zero Google Fonts,
 zero Elementor assets: `/`, `/onze-werkwijze/`, `/projecten/`, `/over-ons/`,
-`/blog/`, `/contact/`, and the example post. Components confirmed: 5 accordion
-items, 2 team cards, 4 contact fields, blog card grid, real WP nav menu,
-`lang="nl-NL"`, sitemap and robots.txt.
+`/blog/`, `/contact/`, and a post. All 8 images in the media library with
+`srcset`. **Home page cold load: 0.98 MB, down from ~16 MB.**
 
-`bin/seed.sh` populates a site from empty and is idempotent. `bin/deploy.sh`
-ships the theme and purges cache. Both verified against staging.
+Lighthouse (local, before task-008 landed): SEO 100, Best Practices 100,
+Accessibility 95, Performance 75 — the 75 was entirely the 7.5 MB hero, now
+fixed, so re-measure to confirm it clears 90.
 
-**Elementor and envato-elements were deactivated on staging.** They loaded
+`bin/seed.sh` populates a site from empty; `bin/deploy.sh` ships the theme and
+purges cache. Both rehearsed repeatedly against staging.
+
+**Elementor and envato-elements are deactivated on staging** — they loaded
 Elementor's frontend bundle plus three Google Font families on the front page,
-because `page_on_front` is an old Elementor document. This undid task-009's
-font work. The same must be done on production — see task-012.
+undoing task-009's font work. Must be repeated on production (task-012).
 
-## The one thing left
+## Two fixes made directly, not by a worker
 
-**task-008 — images to the media pipeline.** Not merged. It was still running
-at 135 turns when the usage limit hit 100%. It is the only thing standing
-between the site and a Lighthouse Performance pass: LCP is ~44s, entirely from
-`home-hero.webp` at 7.5 MB served eagerly. Everything else in the report is
-green (SEO 100, Best Practices 100, Accessibility 95, Performance 75).
+Both found while verifying the staging deploy, both fixed at the usage limit
+when dispatching a worker was impractical:
 
-Check `gv ls --json` first — the worker may have finished, died, or be
-mid-retry.
+- **`imagescale()` with `IMG_BICUBIC` returns false on SiteGround's GD 2.3.3.**
+  Three home-page photos silently failed to import — exactly the three source
+  files over the 2560px cap, the only ones reaching the resize branch. Not
+  memory (768M) and not decoding. Now falls back to the default filter, then to
+  `imagecopyresampled`. Committed.
+- **The example post on staging had no featured image**, because `seed.php`
+  skips content that already exists rather than converging it. Patched staging
+  by hand; the script gap is tracked as task-013.
 
-**Do not run `gv untrack task-008 --rm` before checking the worktree.** As of
-02:30 it held ~36 minutes of *uncommitted* work, and `--rm` deletes the
-worktree. Look first:
+## What is left
 
-```
-W=/Users/mauro/Dev/.worktrees/vivera-site/task-008-move-images-to-the-wordpress
-git -C "$W" status --short
-git -C "$W" log --oneline main..HEAD
-```
-
-If there are uncommitted changes worth keeping, salvage them before doing
-anything destructive:
-
-```
-git -C "$W" add -A && git -C "$W" commit -m "task-008: WIP salvaged"
-git -C "$W" push -u origin task-008-move-images-to-the-wordpress
-```
-
-Only re-grab from scratch once you are sure nothing is worth keeping.
-
-Two things that worktree had already worked out, worth not rediscovering:
-
-- `add_image_size()` from `even_setup()` does not register when the theme is
-  switched mid-request, so on a fresh install every imported image silently
-  gets no generated sizes. Fix: call `even_setup()` explicitly in the importer.
-- It moved the bundled fallback images to `assets/img/seed/`, separating
-  "shipped with the theme so a fresh install is not broken" from "belongs in
-  the media library". That split is worth keeping.
-
-Note this task cost **$12.15 over 173 turns on Sonnet** — more than any Opus
-task in this project. Image work is genuinely fiddly; budget for it.
+| Task | |
+|---|---|
+| 012 | **Production cutover — blocked on the operator's approval** |
+| 013 | `seed.php` should converge existing content, not skip it (low) |
 
 ## How to continue
 
