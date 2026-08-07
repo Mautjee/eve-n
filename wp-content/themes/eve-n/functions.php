@@ -24,6 +24,9 @@ require_once get_theme_file_path( 'inc/accordion.php' );
 /** Contact page: the admin-post form handler. */
 require_once get_theme_file_path( 'inc/contact-form.php' );
 
+/** SEO: per-page title/meta description/canonical/OG/Twitter/JSON-LD, robots.txt. */
+require_once get_theme_file_path( 'inc/seo.php' );
+
 /**
  * Theme supports and menu registration.
  */
@@ -51,22 +54,19 @@ add_action( 'after_setup_theme', 'even_setup' );
 
 /**
  * Front-end assets.
+ *
+ * Roboto is self-hosted (assets/fonts/, @font-face in main.css) rather than
+ * requested from Google Fonts — that was a render-blocking third-party
+ * request. See even_preload_font() for the preload of the base weight.
  */
 function even_assets() {
 	$css = get_theme_file_path( 'assets/css/main.css' );
 	$js  = get_theme_file_path( 'assets/js/main.js' );
 
 	wp_enqueue_style(
-		'even-fonts',
-		'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
-		array(),
-		null
-	);
-
-	wp_enqueue_style(
 		'even-main',
 		get_theme_file_uri( 'assets/css/main.css' ),
-		array( 'even-fonts' ),
+		array(),
 		file_exists( $css ) ? filemtime( $css ) : EVEN_VERSION
 	);
 
@@ -81,19 +81,62 @@ function even_assets() {
 add_action( 'wp_enqueue_scripts', 'even_assets' );
 
 /**
- * Preconnect to the Google Fonts hosts so the stylesheet request starts earlier.
- *
- * @param array  $urls           URLs to print.
- * @param string $relation_type  Link relation.
- * @return array
+ * Preload the body-text Roboto weight: it is used above the fold on every
+ * page (nav, hero subtitle) and would otherwise wait for main.css to be
+ * parsed before the browser discovers it.
  */
-function even_resource_hints( $urls, $relation_type ) {
-	if ( 'preconnect' === $relation_type ) {
-		$urls[] = array( 'href' => 'https://fonts.gstatic.com', 'crossorigin' );
-	}
-	return $urls;
+function even_preload_font() {
+	printf(
+		'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+		esc_url( get_theme_file_uri( 'assets/fonts/roboto-v51-latin-400.woff2' ) )
+	);
 }
-add_filter( 'wp_resource_hints', 'even_resource_hints', 10, 2 );
+add_action( 'wp_head', 'even_preload_font', 1 );
+
+/**
+ * Performance: this is a classic theme with no blocks on the front end, so
+ * drop the block-library CSS, global styles and the emoji script/styles that
+ * WordPress core enqueues by default.
+ */
+function even_dequeue_block_assets() {
+	wp_dequeue_style( 'wp-block-library' );
+	wp_dequeue_style( 'wp-block-library-theme' );
+	wp_dequeue_style( 'classic-theme-styles' );
+	wp_dequeue_style( 'global-styles' );
+}
+add_action( 'wp_enqueue_scripts', 'even_dequeue_block_assets', 20 );
+
+// Core also prints the block-editor preset CSS custom properties (colours,
+// font sizes, spacing scale) as an inline "global-styles" block from
+// wp_footer, after the dequeue above runs — remove both hooks that do it.
+remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
+
+remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+remove_action( 'wp_print_styles', 'print_emoji_styles' );
+remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+remove_action( 'admin_print_styles', 'print_emoji_styles' );
+remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+add_filter( 'emoji_svg_url', '__return_false' );
+
+/**
+ * The favicon and touch icons exported from the EVE-N mark
+ * (assets/img/favicon/), flattened onto the brand teal for the opaque
+ * touch-icon slots.
+ */
+function even_favicons() {
+	$base = get_theme_file_uri( 'assets/img/favicon/' );
+	?>
+	<link rel="icon" href="<?php echo esc_url( $base . 'favicon.ico' ); ?>" sizes="32x32">
+	<link rel="icon" href="<?php echo esc_url( $base . 'favicon-16x16.png' ); ?>" sizes="16x16" type="image/png">
+	<link rel="icon" href="<?php echo esc_url( $base . 'favicon-32x32.png' ); ?>" sizes="32x32" type="image/png">
+	<link rel="icon" href="<?php echo esc_url( $base . 'favicon-192x192.png' ); ?>" sizes="192x192" type="image/png">
+	<link rel="apple-touch-icon" href="<?php echo esc_url( $base . 'apple-touch-icon.png' ); ?>">
+	<?php
+}
+add_action( 'wp_head', 'even_favicons', 2 );
 
 /**
  * The header logo: the site's custom logo when one is set, otherwise the mark

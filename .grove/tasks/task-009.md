@@ -1,7 +1,7 @@
 ---
 id: task-009
 title: "Performance, SEO and metadata pass"
-status: todo
+status: review
 priority: low
 labels: [performance, seo]
 created: 2026-08-07

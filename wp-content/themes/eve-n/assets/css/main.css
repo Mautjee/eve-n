@@ -3,6 +3,32 @@
    Design tokens: Adobe XD globalResources.json
    ================================================================ */
 
+/* ---- Self-hosted Roboto (task-009) ----
+   Latin subset only (covers Dutch copy incl. the euro sign), replacing the
+   Google Fonts request. Files in ../fonts/, fetched from
+   fonts.gstatic.com/s/roboto/v51 at the same weights the site actually uses. */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/roboto-v51-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/roboto-v51-latin-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/roboto-v51-latin-700.woff2') format('woff2');
+}
+
 /* ---- CSS Custom Properties (Tokens) ---- */
 :root {
   /* Brand */
