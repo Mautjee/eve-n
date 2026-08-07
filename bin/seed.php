@@ -381,7 +381,27 @@ function even_seed_prepare_image( $path, $max_dim = 2560, $quality = 82 ) {
 		$scale      = min( $max_dim / $width, $max_dim / $height );
 		$new_width  = max( 1, (int) round( $width * $scale ) );
 		$new_height = max( 1, (int) round( $height * $scale ) );
-		$resized    = imagescale( $image, $new_width, $new_height, IMG_BICUBIC );
+
+		// imagescale() with IMG_BICUBIC returns false on SiteGround's GD 2.3.3
+		// while the default mode and imagecopyresampled() both work there. Only
+		// images over $max_dim reach this branch, so the failure was invisible
+		// locally and silently dropped three home-page photos on the server.
+		// Try the best filter first, then fall back rather than giving up.
+		$resized = @imagescale( $image, $new_width, $new_height, IMG_BICUBIC );
+
+		if ( ! $resized ) {
+			$resized = @imagescale( $image, $new_width, $new_height );
+		}
+
+		if ( ! $resized ) {
+			$resized = imagecreatetruecolor( $new_width, $new_height );
+
+			if ( $resized && ! imagecopyresampled( $resized, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height ) ) {
+				imagedestroy( $resized );
+				$resized = false;
+			}
+		}
+
 		imagedestroy( $image );
 
 		if ( ! $resized ) {
