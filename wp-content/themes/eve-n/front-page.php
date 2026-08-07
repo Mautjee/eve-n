@@ -43,7 +43,21 @@ get_header();
 		?>
 		<div class="hero-content">
 			<div class="hero-logo">
-				<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo.webp' ) ); ?>" alt="<?php esc_attr_e( 'EVE-N logo', 'eve-n' ); ?>" width="60" height="60">
+				<?php if ( even_seeded_image_id( 'hero-mark' ) ) : ?>
+					<?php
+					// The three-bar E mark, resolved from the media library. It ships
+					// teal/gold/black on transparent — see the CSS section
+					// "Hero mark — white via filter" for how it turns white here.
+					even_seeded_image(
+						'hero-mark',
+						'medium',
+						array( 'class' => 'hero-logo__mark' )
+					);
+					?>
+				<?php else : ?>
+					<?php // Attachment not seeded yet — the bundled white house keeps the hero from rendering a broken image. ?>
+					<img class="hero-logo__mark" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo.webp' ) ); ?>" alt="<?php esc_attr_e( 'Merkteken van Eve-n', 'eve-n' ); ?>" width="60" height="60">
+				<?php endif; ?>
 				<h1 class="logo-text">EVE-N</h1>
 			</div>
 			<p class="hero-subtitle">Bouwen aan succes; teamontwikkeling en samenwerking binnen infrastructuurprojecten</p>

@@ -458,7 +458,19 @@ function even_seed_image( $key, $file, $title, $alt ) {
 		return 0;
 	}
 
-	$prepared = even_seed_prepare_image( $source );
+	if ( 'webp' === strtolower( pathinfo( $file, PATHINFO_EXTENSION ) ) ) {
+		$prepared = even_seed_prepare_image( $source );
+	} else {
+		// Not an XD photo export, so none of even_seed_prepare_image()'s
+		// resize/re-encode applies — just hand media_handle_sideload() a
+		// throwaway copy. It renames/deletes whatever `tmp_name` points at,
+		// and $source is the theme's committed copy, not a scratch file.
+		$prepared = wp_tempnam( $file );
+
+		if ( $prepared && ! copy( $source, $prepared ) ) {
+			$prepared = false;
+		}
+	}
 
 	if ( ! $prepared ) {
 		WP_CLI::warning( "Could not process '{$file}' for '{$key}' — skipping." );
@@ -604,6 +616,11 @@ $even_image_manifest = array(
 		'file'  => 'werkwijze-hero.webp',
 		'title' => 'Team werkt samen tijdens een brainstormsessie',
 		'alt'   => __( 'Team dat samen ideeën uitwerkt met plaknotities tijdens een brainstormsessie', 'eve-n' ),
+	),
+	'hero-mark'        => array(
+		'file'  => 'hero-mark.png',
+		'title' => 'Eve-n merkteken',
+		'alt'   => __( 'Grafisch merkteken van Eve-n', 'eve-n' ),
 	),
 );
 
