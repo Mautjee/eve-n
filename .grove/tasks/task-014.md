@@ -1,7 +1,7 @@
 ---
 id: task-014
 title: "Header house as home button; white E mark in the hero"
-status: todo
+status: in-progress
 priority: high
 labels: [theme, branding]
 created: 2026-08-07
