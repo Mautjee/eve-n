@@ -173,13 +173,20 @@ function even_logo() {
 	$custom = get_theme_mod( 'custom_logo' );
 
 	if ( $custom ) {
+		// 'medium', not 'full'. The logo occupies ~160px of a 56px-tall bar, but
+		// wp_get_attachment_image() advertises the requested size in `sizes`, so
+		// 'full' told browsers a 2000px-wide image filled 100vw and had them
+		// download it for a header slot. An explicit `sizes` keeps srcset honest.
 		echo wp_get_attachment_image(
 			$custom,
-			'full',
+			'medium',
 			false,
 			array(
-				'class' => 'nav-logo__img',
-				'alt'   => esc_attr( get_bloginfo( 'name' ) ),
+				'class'         => 'nav-logo__img',
+				'alt'           => get_bloginfo( 'name' ),
+				'sizes'         => '(max-width: 768px) 120px, 160px',
+				// The hero is the LCP element; the logo must not compete with it.
+				'fetchpriority' => 'low',
 			)
 		);
 		return;

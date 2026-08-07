@@ -1911,3 +1911,27 @@ h2 {
 .cta-photo::before {
   z-index: 1;
 }
+
+/* ================================================================
+   Header logo — wordmark, not a square icon
+   The base rule sizes .nav-logo img to a fixed 28x28, which suited the
+   XD design's square house mark. The brand logo is the EVE-N wordmark
+   at roughly 5:1, and forcing it into a square either distorts it or
+   (with a square canvas) shrinks the artwork to a few pixels tall.
+   Constrain the height and let the width follow the aspect ratio.
+   ================================================================ */
+.nav-logo img,
+.nav-logo .nav-logo__img {
+  width: auto;
+  height: 28px;
+  max-width: 170px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .nav-logo img,
+  .nav-logo .nav-logo__img {
+    height: 24px;
+    max-width: 130px;
+  }
+}
