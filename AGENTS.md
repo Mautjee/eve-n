@@ -60,7 +60,6 @@ sprawl.** Keep it that way.
   again. Do not delete these until every page is ported.
 - `screenshots/` — browser captures for comparison, `<page>-<width>[-vN].png`
   (1920 = desktop, 393 = phone). Gitignored.
-- `.grove/tasks/task-NNN.md` — the work queue.
 
 ## Local development
 
@@ -89,13 +88,14 @@ Site: `http://localhost:8888`. Admin: `http://localhost:8888/wp-admin`
 (`admin` / `password`). The theme is mounted from `wp-content/themes/eve-n`,
 so edits are live on refresh.
 
-**Working in a Grove worktree?** Port 8888 belongs to the main checkout. Each
-worktree gets a gitignored `.wp-env.override.json` assigning it a free port —
-`wp-env start` picks it up automatically and prints the real URL. Use that URL,
-not 8888. If the file is missing, create it — and include the `config` block,
-not just the ports: `.wp-env.json`'s `WP_HOME`/`WP_SITEURL` are hard-coded to
-`8888`, and without overriding both here too, WordPress 301-redirects every
-request back to the main checkout's port and pretty permalinks 404.
+**Running a second checkout in parallel?** Port 8888 belongs to whichever
+checkout started first. Give each additional checkout a gitignored
+`.wp-env.override.json` assigning it a free port — `wp-env start` picks it up
+automatically and prints the real URL. Use that URL, not 8888. Include the
+`config` block, not just the ports: `.wp-env.json`'s `WP_HOME`/`WP_SITEURL` are
+hard-coded to `8888`, and without overriding both here too, WordPress
+301-redirects every request back to the first checkout's port and pretty
+permalinks 404.
 
 ```json
 {

@@ -1,81 +1,103 @@
 # Resume the build
 
-Paste this into a fresh Claude Code session in `/Users/mauro/Dev/vivera-site`
-to pick the work back up. Written 2026-08-07 while the operator was away.
-
-You are the **Grove orchestrator**: workers write the code, you triage, review,
-merge and deploy. Read `AGENTS.md` first — it holds the goal, the architecture
+Updated 2026-10-09. Read `AGENTS.md` first — it holds the goal, the architecture
 decisions and their reasoning, the conventions, and the wp-cli gotchas.
 
-## Where things stood
+## Where things stand
 
-**All twelve build tasks are merged and live on https://staging2.eve-n.nl.**
-Eleven PRs reviewed and merged. The build is feature-complete.
+**The build is complete and live on https://eve-n.nl.** Production cutover on
+2026-10-09. Staging is https://staging2.eve-n.nl.
 
-Verified on staging — every page HTTP 200, zero PHP errors, zero Google Fonts,
-zero Elementor assets: `/`, `/onze-werkwijze/`, `/projecten/`, `/over-ons/`,
-`/blog/`, `/contact/`, and a post. All 8 images in the media library with
-`srcset`. **Home page cold load: 0.98 MB, down from ~16 MB.**
+Verified against production on 2026-10-09:
 
-Lighthouse (local, before task-008 landed): SEO 100, Best Practices 100,
-Accessibility 95, Performance 75 — the 75 was entirely the 7.5 MB hero, now
-fixed, so re-measure to confirm it clears 90.
+- `/`, `/onze-werkwijze/`, `/projecten/`, `/over-ons/`, `/blog/`, `/contact/` and a blog
+  post all return HTTP 200 over HTTPS with a valid certificate, and `www` 301s to the
+  apex.
+- The theme is `eve-n` on every page. Zero Elementor, zero Google Fonts, zero Astra in
+  the served HTML.
+- The header carries the bundled white house as the home button; the hero carries the
+  three-bar E mark from the media library, whited out with
+  `filter: brightness(0) invert(1)`.
+- Images are WebP with full `srcset` ladders. Canonical and `og:` tags are present.
+- Home page cold load is 0.98 MB, down from ~16 MB.
 
-`bin/seed.sh` populates a site from empty; `bin/deploy.sh` ships the theme and
-purges cache. Both rehearsed repeatedly against staging.
+Local Lighthouse before task-008 landed: SEO 100, Best Practices 100, Accessibility 95,
+Performance 75 — the 75 was entirely the 7.5 MB hero, since fixed, so re-measure if you
+want the number confirmed above 90.
 
-**Elementor and envato-elements are deactivated on staging** — they loaded
-Elementor's frontend bundle plus three Google Font families on the front page,
-undoing task-009's font work. Must be repeated on production (task-012).
-
-## Two fixes made directly, not by a worker
-
-Both found while verifying the staging deploy, both fixed at the usage limit
-when dispatching a worker was impractical:
-
-- **`imagescale()` with `IMG_BICUBIC` returns false on SiteGround's GD 2.3.3.**
-  Three home-page photos silently failed to import — exactly the three source
-  files over the 2560px cap, the only ones reaching the resize branch. Not
-  memory (768M) and not decoding. Now falls back to the default filter, then to
-  `imagecopyresampled`. Committed.
-- **The example post on staging had no featured image**, because `seed.php`
-  skips content that already exists rather than converging it. Patched staging
-  by hand; the script gap is tracked as task-013.
+`bin/seed.sh` takes a site from empty to populated; `bin/deploy.sh` ships the theme and
+purges the cache. Both were rehearsed repeatedly against staging.
 
 ## What is left
 
-| Task | |
-|---|---|
-| 012 | **Production cutover — blocked on the operator's approval** |
-| 013 | `seed.php` should converge existing content, not skip it (low) |
+**`http://eve-n.nl` serves a 200 instead of redirecting to HTTPS.** nginx answers plain
+HTTP directly. Canonical is https so search engines are covered, but there is neither a
+redirect nor HSTS. Fix with SiteGround's "Enforce HTTPS" or an `.htaccess` rule.
 
-## How to continue
+**Real copy is missing, and it is live.** Two separate fixes, and it matters which:
+
+- **Home page** — the lorem ipsum is hardcoded in `front-page.php` (`card__body`
+  paragraphs). That is a code change. `AGENTS.md` records Home as "hardcoded for v1,
+  revisit later".
+- **`/projecten/`** — the lorem is page content. `page-projecten.php` parses accordion
+  items out of `the_content()`, and the text was seeded from
+  `reference/catalog-reviews.md`, which is itself placeholder. Editing the page in
+  `wp-admin` is enough; no template change needed. Needs five project descriptions from
+  EVE-N.
+
+**`seed.php` skips content that already exists instead of converging it.** Previously
+tracked as task-013: on staging the example post had no featured image because the
+script refuses to touch a post that already exists. Production is fine (the post has its
+image), but the gap is still in `bin/seed.php`.
+
+**Minor:** the hero mark ships `alt=""`. Decorative is defensible given the visible word
+EVE-N sits beside it, but task-014 asked for meaningful Dutch alt text.
+
+## Platform traps found the hard way
+
+- **`imagescale()` with `IMG_BICUBIC` returns false on SiteGround's GD 2.3.3.** Three
+  home-page photos silently failed to import — exactly the three source files over the
+  2560px cap, the only ones reaching the resize branch. It was not memory (768M) and not
+  decoding. The code now falls back to the default filter, then to
+  `imagecopyresampled`.
+- **Elementor and envato-elements must stay deactivated on production.** While active
+  they loaded Elementor's frontend bundle plus three Google Font families on the front
+  page, undoing task-009's font work.
+- **`wp-env run cli` silently swallows writes** — use `docker exec` into the `-cli-1`
+  container instead. See `AGENTS.md` for the exact incantation.
+- **Syntax-check PHP without a local PHP install:**
+  `docker run --rm -v "$PWD/<file>:/f.php" php:8.2-cli php -l /f.php`
+
+## Working from a fresh machine
+
+- **Local WordPress needs Docker, and the user must be in the `docker` group**, or
+  `npx wp-env start` cannot reach the socket.
+- **`.env` is gitignored.** Copy `.env.example` and fill it in; the confirmed theme paths
+  are documented in the example.
+- **The SiteGround deploy key is per-machine.** Register the new public key in Site
+  Tools → Devs → SSH Keys Manager, then point `SG_KEY` at it.
+- **Rotate the old SiteGround SSH passphrase** — it was pasted into a chat transcript on
+  2026-08-07.
+
+## Deploy
 
 ```
-git pull
-gv ls --json                    # who is alive, who has a PR
-gh pr list
+./bin/deploy.sh --dry-run      # show what would transfer, change nothing
+./bin/deploy.sh                # staging (the default), then purge cache
+./bin/deploy.sh --activate     # staging, activate eve-n, purge cache
+./bin/deploy.sh --production   # live; asks you to type a confirmation
 ```
 
-1. **Re-grab anything dead**: `gv grab <task> --repo vivera-site --model claude-sonnet-5`
-2. **Give each worktree its own port** — `.wp-env.override.json` with
-   `{"port": 89NN, "testsPort": 89NN}`, gitignored. Without this the second
-   worker to start WordPress fails on the port 8888 collision.
-3. **Review each PR by reading the diff**, not just the description.
-4. **Merge.** Conflicts in `functions.php` and `assets/css/main.css` are
-   expected and always additive — keep both sides. Then check:
-   - no `<<<<<<<` / `>>>>>>>` markers anywhere
-   - CSS braces balanced
-   - `php -l` clean: `docker run --rm -v "$PWD/<file>:/f.php" php:8.2-cli php -l /f.php`
-5. **Verify locally**, then `./bin/deploy.sh --activate`, then confirm staging
-   still serves `wp-content/themes/eve-n` with no errors.
+**Always purge.** SG Optimizer caches HTML and concatenates assets, so a manual SFTP
+upload looks like it did nothing. `bin/deploy.sh` purges for you.
 
-**Staging only. Do not deploy to production.**
+Rollback is switching the active theme back to `astra` and purging — the exact command
+is in `AGENTS.md`. The theme files stay on the server, so rolling forward again is
+`./bin/deploy.sh --activate`.
 
-## Open items for the operator
+## Content architecture reminder
 
-- **Real copy is missing.** The Projecten cards and blog posts are still lorem
-  ipsum. Needs five project descriptions and a first blog post from EVE-N.
-- **Production cutover** has not happened and needs their explicit go-ahead.
-- **Rotate the SiteGround SSH passphrase** — it was pasted into a chat
-  transcript on 2026-08-07.
+Which parts are editable in `wp-admin` versus fixed in a template decides whether the
+client can maintain this site without a developer. Default to editable; hardcode only
+where the layout genuinely cannot survive free-form content. The per-page table is in
+`AGENTS.md`.
